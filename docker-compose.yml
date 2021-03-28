@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  apache:
+    build: apache
+    volumes:
+      - ./openeclass:/var/www/html
+      - ./conf/000-default.conf:/etc/apache2/sites-available/000-default.conf
+      - ./conf/php.ini:/etc/php53/apache2/php.ini
+    ports:
+      - "8001:80"
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+    ports:
+      - "9906:3306"
+    volumes:
+      - ./conf/my.cnf:/etc/mysql/my.cnf
