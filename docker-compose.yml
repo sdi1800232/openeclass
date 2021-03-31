@@ -1,9 +1,10 @@
-version: '3'
+version: '2.4'
 
 services:
   apache:
     build: apache
     restart: always
+    oom_kill_disable: true
     volumes:
       - ./openeclass:/var/www/openeclass
       - ./puppies:/var/www/puppies
@@ -14,6 +15,7 @@ services:
   db:
     image: mysql:5.7
     restart: always
+    oom_kill_disable: true
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     ports:
