@@ -38,7 +38,7 @@ To site είναι διαθέσιμο στο http://localhost:8001/. Την πρ
 το openeclass από την αρχή, διαγράψτε το directory, `openeclass/config` και ο
 οδηγός εγκατάστασης θα τρέξει ξανά.
 
-## 2022 Project 1
+## 2023 Project 1
 
 Εκφώνηση: https://ys13.chatzi.org/assets/projects/project1.pdf
 
