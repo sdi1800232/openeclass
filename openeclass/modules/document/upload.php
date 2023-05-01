@@ -47,7 +47,7 @@ if($is_adminOfCourse) {
 	if(!isset($_REQUEST['uploadPath'])) {
 		$_REQUEST['uploadPath'] = "";
 	}
-	
+
 	$nameTools = $langDownloadFile;
 	$navigation[]= array ("url"=>"document.php", "name"=> $langDoc);
 	$tool_content .= "

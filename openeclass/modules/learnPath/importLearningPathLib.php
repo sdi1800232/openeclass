@@ -122,7 +122,7 @@ function startElement($parser,$name,$attributes)
                         if (isset($attributes['HREF'])) $manifestData['scos'][$attributes['IDENTIFIER']]['href'] = $attributes['HREF'];
 
                         if (isset($attributes['XML:BASE'])) $manifestData['scos'][$attributes['IDENTIFIER']]['xml:base'] = $attributes['XML:BASE'];
-                        
+
                         // eidiko flag gia na anixneusoume osa scorm paketa einai typou assets
                         // dhladh osa den perilambanoun javascript gia thn parakolou8hsh ths proodou,
                         // opote allou ston kwdika 8a prepei na ta xeiristoume diaforetika
@@ -299,7 +299,7 @@ function elementData($parser,$data)
                 if ( !($fp = @fopen($file, "r")) )
                 {
                 	$file = str_replace("\\", "/", $file); // kanoume mia dokimh mhn tyxon do8hke la8os dir separator, antistrefontas tis ka8etous. ta windows paizoun kai me to unix dir separator
-                	
+
                 	$unzippingState = $zipFile->extract(PCLZIP_OPT_BY_NAME,$pathToManifest.$file, PCLZIP_OPT_REMOVE_PATH, $pathToManifest);
                 	if ( !($fp = @fopen($file, "r")) )
 	                {
@@ -307,7 +307,7 @@ function elementData($parser,$data)
 	                    array_push ($errorMsgs, $langErrorOpeningXMLFile.$pathToManifest.$file );
                 	}
                 }
-                
+
                 if (!$errorFound)
                 {
                     if (!isset($cache)) $cache = "";
@@ -537,10 +537,10 @@ function doImport($currentCourseID, $mysqlMainDb, $webDir, $scoFileSize, $scoFil
 	global $itemsPile;
 	global $manifestData;
 	global $iterator;
-	
+
 	$pwd = getcwd();
 	mysql_select_db($currentCourseID);
-	
+
 	$TABLELEARNPATH         = "lp_learnPath";
 	$TABLEMODULE            = "lp_module";
 	$TABLELEARNPATHMODULE   = "lp_rel_learnPath_module";
@@ -550,16 +550,16 @@ function doImport($currentCourseID, $mysqlMainDb, $webDir, $scoFileSize, $scoFil
 	// init msg arays
 	$okMsgs   = array();
 	$errorMsgs = array();
-	
+
 	$maxFilledSpace = 100000000;
-	
+
 	$courseDir   = "courses/".$currentCourseID."/scormPackages/";
 	$tempDir     = "courses/".$currentCourseID."/temp/";
 	$baseWorkDir = $webDir.$courseDir; // path_id
 	$tempWorkDir = $webDir.$tempDir;
-	
+
 	if (!is_dir($baseWorkDir)) claro_mkdir($baseWorkDir, CLARO_FILE_PERMISSIONS);
-		
+
     // arrays used to store inserted ids in case
     // will be used to build delete queries for mysql < 4.0.0
     $insertedModule_id = array();
@@ -1003,7 +1003,7 @@ function doImport($currentCourseID, $mysqlMainDb, $webDir, $scoFileSize, $scoFil
                 // create new module
 
                 if (!isset($item['datafromlms'])) $item['datafromlms'] = "";
-                
+
                 // elegxoume an to contentType prepei na einai scorm h asset
                 if (isset($manifestData['scos'][$item['identifierref']]['contentTypeFlag']) && $manifestData['scos'][$item['identifierref']]['contentTypeFlag'] == CTSCORMASSET_)
                 	$contentType = CTSCORMASSET_;
@@ -1242,10 +1242,10 @@ function doImport($currentCourseID, $mysqlMainDb, $webDir, $scoFileSize, $scoFil
     }
     //$importMessages .= "\n<br /><a href=\"learningPathList.php\">$langBack</a></p>";
     $importMessages .= "\n<br /></p>";
-    
+
     mysql_select_db($mysqlMainDb);
     chdir($pwd);
-    
+
     return array($importMessages, $tempPathId);
 }
 

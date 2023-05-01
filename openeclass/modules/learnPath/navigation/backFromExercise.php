@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*========================================================================
 *   Open eClass 2.3
 *   E-learning and Course Management System
@@ -28,22 +28,22 @@
 	backFromExercise.php
 	@last update: 30-06-2006 by Thanos Kyritsis
 	@authors list: Thanos Kyritsis <atkyritsis@upnet.gr>
-	               
+
 	based on Claroline version 1.7 licensed under GPL
 	      copyright (c) 2001, 2006 Universite catholique de Louvain (UCL)
-	      
+
 	      original file: backFromExercise.php Revision: 1.6
-	      
+
 	Claroline authors: Piraux Sebastien <pir@cerdecam.be>
                       Lederer Guillaume <led@cerdecam.be>
-==============================================================================        
-    @Description: This script refreshes the upper frame for the user to see 
+==============================================================================
+    @Description: This script refreshes the upper frame for the user to see
                   his updated learning path progress and prompts him
                   to click next after finishing an exercise.
 
     @Comments:
- 
-    @todo: 
+
+    @todo:
 ==============================================================================
 */
 

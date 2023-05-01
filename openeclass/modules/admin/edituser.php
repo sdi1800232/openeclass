@@ -45,6 +45,7 @@ include '../../include/baseTheme.php';
 include 'admin.inc.php';
 include '../auth/auth.inc.php';
 include '../../include/jscalendar/calendar.php';
+include '../htmlpurifier/library/HTMLPurifier.auto.php';
 
 if (isset($_GET['u']) or isset($_POST['u']))
 $_SESSION['u_tmp']=$u;
@@ -85,7 +86,7 @@ if((!empty($u)) && ctype_digit($u) )	// validate the user id
     </ul>
   </div>";
 		$tool_content .= "
-<form name='edituser' method='post' action='$_SERVER[PHP_SELF]'>
+<form name='edituser' method='post' action='". htmlspecialchars($_SERVER[PHP_SELF]) ."'>
   <table class='FormData' width='99%' align='left'>
   <tbody>
   <tr>
@@ -193,6 +194,8 @@ $tool_content .= "
                 $tool_content .= "<option value='$m'>$m</option>";
         $tool_content .= "</select></td>";
 
+
+	$_SESSION['token'] = bin2hex(openssl_random_pseudo_bytes(32));
 	$tool_content .= "
   </tr>
   <tr>
@@ -206,13 +209,16 @@ $tool_content .= "
       <input type='hidden' name='u_submitted' value='1' />
       <input type='hidden' name='registered_at' value='".$info['registered_at']."' />
       <input type='submit' name='submit_edituser' value='$langModify' />
-    </td>
-  </tr>
-  <tr>
-    <td colspan='2'>&nbsp;</td>
-  </tr>
-  </tbody>
-  </table>
+	  </td>
+	  </tr>
+	  <tr>
+	  <td colspan='2'>&nbsp;</td>
+	  </tr>
+	  </tbody>
+	  </table>
+
+	  <input  type=\"hidden\" name=\"token\" value='".$_SESSION['token']."'>
+
 </form>";
 
 		$sql = mysql_query("SELECT nom, prenom, username FROM user WHERE user_id = '$u'");
@@ -287,7 +293,11 @@ $tool_content .= "
 			}
 		}
 	}  else { // if the form was submitted then update user
-
+		if (empty($_POST['token']) || $_SESSION['token'] !== $_POST['token'] ) {
+                header($_SERVER['SERVER_PROTOCOL'] . ' 405 Method Not Allowed');
+                exit();
+		}
+		unset($_SESSION['token']);
 		// get the variables from the form and initialize them
 		$fname = isset($_POST['fname'])?$_POST['fname']:'';
 		$lname = isset($_POST['lname'])?$_POST['lname']:'';
@@ -304,9 +314,24 @@ $tool_content .= "
 		$hour = isset($_POST['hour'])?$_POST['hour']:'';
 		$minute = isset($_POST['minute'])?$_POST['minute']:'';
 		$date = explode("-",  $date);
-    		$day=$date[0];
-    		$year=$date[2];
-    		$month=$date[1];
+		$day=$date[0];
+		$year=$date[2];
+		$month=$date[1];
+
+		$purifier = new HTMLPurifier(HTMLPurifier_Config::createDefault());
+		$fname = $purifier->purify($fname);
+		$lname = $purifier->purify($lname);
+		$username = $purifier->purify($username);
+		$email = $purifier->purify($email);
+		$phone = $purifier->purify($phone);
+		$am = $purifier->purify($am);
+		$department = $purifier->purify($department);
+		$registered_at = $purifier->purify($registered_at);
+		$date = $purifier->purify($date);
+		$newstatut = $purifier->purify($newstatut);
+
+
+
 		$expires_at = mktime($hour, $minute, 0, $month, $day, $year);
 		$user_exist= FALSE;
 		// check if username is free
@@ -321,14 +346,14 @@ if (mysql_num_rows($username_check) > 1) {
   if (empty($fname) OR empty($lname) OR empty($username)) {
 	$tool_content .= "<table width='99%'><tbody><tr>
         <td class='caution' height='60'><p>$langEmptyFields</p>
-	<p><a href='$_SERVER[PHP_SELF]'>$langAgain</a></p></td></tr></tbody></table><br /><br />";
+	<p><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."'>$langAgain</a></p></td></tr></tbody></table><br /><br />";
 	draw($tool_content, 3, ' ', $head_content);
 	    exit();
 	}
  	 elseif(isset($user_exist) AND $user_exist == TRUE) {
 		$tool_content .= "<table width='99%'><tbody><tr>
           	<td class='caution' height='60'><p>$langUserFree</p>
-		<p><a href='$_SERVER[PHP_SELF]'>$langAgain</a></p></td></tr></tbody></table><br /><br />";
+		<p><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."'>$langAgain</a></p></td></tr></tbody></table><br /><br />";
 		draw($tool_content, 3, ' ', $head_content);
 	    exit();
   }
@@ -337,7 +362,7 @@ if (mysql_num_rows($username_check) > 1) {
 		} else {
 			if ($u=='1') $department = 'NULL';
 			$sql = "UPDATE user SET nom = ".autoquote($lname).", prenom = ".autoquote($fname).",
-				username = ".autoquote($username).", email = ".autoquote($email).", 
+				username = ".autoquote($username).", email = ".autoquote($email).",
 				statut = ".intval($newstatut).", phone=".autoquote($phone).",
 				department = ".intval($department).", expires_at=".$expires_at.",
                                 am = ".autoquote($am)." WHERE user_id = ".intval($u);

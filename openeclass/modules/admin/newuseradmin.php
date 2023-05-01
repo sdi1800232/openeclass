@@ -24,10 +24,10 @@
 *                       eMail: info@openeclass.org
 * =========================================================================*/
 
-
 $require_admin = true;
 include '../../include/baseTheme.php';
 include '../../include/sendMail.inc.php';
+include '../htmlpurifier/library/HTMLPurifier.auto.php';
 $navigation[] = array("url" => "../admin/index.php", "name" => $langAdmin);
 
 // Initialise $tool_content
@@ -50,43 +50,69 @@ $all_set = register_posted_variables(array(
 $submit = isset($_POST['submit'])?$_POST['submit']:'';
 
 if($submit) {
+	if (empty($_GET['token'])) {
+		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+			exit(); 
+	  }
+		
+		if ($_SESSION['token'] !== $_GET['token']) {
+		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+			exit(); 
+	  }
+	  unset($_SESSION['token']);
 	// register user
 	$depid = intval(isset($_POST['department'])?$_POST['department']: 0);
 	$proflanguage = isset($_POST['language'])?$_POST['language']:'';
 	if (!isset($native_language_names[$proflanguage])) {
 		$proflanguage = langname_to_code($language);
 	}
+	$purifier = new HTMLPurifier(HTMLPurifier_Config::createDefault());
 
-	// check if user name exists
-	$username_check = mysql_query("SELECT username FROM `$mysqlMainDb`.user 
-			WHERE username=".autoquote($uname));
-	$user_exist = (mysql_num_rows($username_check) > 0);
+	$connection = new mysqli($GLOBALS['mysqlServer'], $GLOBALS['mysqlUser'], $GLOBALS['mysqlPassword'], $mysqlMainDb);
+	
+	$purifier = new HTMLPurifier(HTMLPurifier_Config::createDefault());
+
+	$statement = $connection->prepare("SELECT username FROM `$mysqlMainDb`.user WHERE username=?");
+	$statement->bind_param("s",$purifier->purify($uname));
+	$statement->execute();
+    $username_check = $statement->get_result();
+    $rows = $username_check->fetch_assoc();
+    $user_exist = ($rows > 0);
+
+    $statement->close();
+    $connection->close();
+
 
 	// check if there are empty fields
 	if (!$all_set) {
 		$tool_content .= "<p class='caution_small'>$langEmptyFields</p>
-			<br><br><p align='right'><a href='$_SERVER[PHP_SELF]'>$langAgain</a></p>";
+			<br><br><p align='right'><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."'>$langAgain</a></p>";
 	} elseif ($user_exist) {
 		$tool_content .= "<p class='caution_small'>$langUserFree</p>
-			<br><br><p align='right'><a href='$_SERVER[PHP_SELF]'>$langAgain</a></p>";
+			<br><br><p align='right'><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."'>$langAgain</a></p>";
 	} elseif(!email_seems_valid($email_form)) {
 		$tool_content .= "<p class='caution_small'>$langEmailWrong.</p>
-			<br><br><p align='right'><a href='$_SERVER[PHP_SELF]'>$langAgain</a></p>";
+			<br><br><p align='right'><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."'>$langAgain</a></p>";
 	} else {
                 $registered_at = time();
 		$expires_at = time() + $durationAccount;
 		$password_encrypted = md5($password);
-		$inscr_user = db_query("INSERT INTO `$mysqlMainDb`.user
-				(nom, prenom, username, password, email, statut, department, am, registered_at, expires_at,lang)
-				VALUES (" .
-				autoquote($nom_form) . ', ' .
-				autoquote($prenom_form) . ', ' .
-				autoquote($uname) . ", '$password_encrypted', " .
-				autoquote($email_form) .
-				", $pstatut, $depid, " . autoquote($comment) . ", $registered_at, $expires_at, '$proflanguage')");
 
+		$connection = new mysqli($GLOBALS['mysqlServer'], $GLOBALS['mysqlUser'], $GLOBALS['mysqlPassword'], $mysqlMainDb);
+
+        $statement = $connection->prepare("INSERT INTO `$mysqlMainDb`.user (nom, prenom, username, password, email, statut, department, am, registered_at, expires_at,lang) VALUES (? , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+		$purifier = new HTMLPurifier(HTMLPurifier_Config::createDefault());
+        
+		$statement->bind_param("s", $purifier->purify( mysql_real_escape_string($nom_form)),$purifier->purify( mysql_real_escape_string($prenom_form)),$purifier->purify( mysql_real_escape_string($uname))
+                                    ,$password_encrypted,$purifier->purify( mysql_real_escape_string($email_form)), $pstatut,mysql_real_escape_string($depid),$purifier->purify( mysql_real_escape_string($comment)),$registered_at,$expires_at,$proflanguage);
+
+
+        $inscr_user = $statement->execute();
+        $statement->close();
+        $connection->close();
 		// close request
-	  	$rid = intval($_POST['rid']);
+	  	$rid = mysql_real_escape_string(intval($_POST['rid']));
   	  	db_query("UPDATE prof_request set status = 2, date_closed = NOW() WHERE rid = '$rid'");
 
                 if ($pstatut == 1) {
@@ -100,9 +126,9 @@ if($submit) {
                         // $langAsUser;
                 }
 	       	$tool_content .= "<p class='success_small'>$message</p><br><br><p align='right'><a href='../admin/listreq.php$reqtype'>$langBackRequests</a></p>";
-		
+
 		// send email
-		
+
                 $emailsubject = "$langYourReg $siteName $type_message";
                 $emailbody = "
 $langDestination $prenom_form $nom_form
@@ -117,7 +143,7 @@ $langManager $siteName
 $langTel $telephone
 $langEmail : $emailhelpdesk
 ";
-		
+
 		send_mail('', '', '', $email_form, $emailsubject, $emailbody, $charset);
 
         }
@@ -125,8 +151,8 @@ $langEmail : $emailhelpdesk
 } else {
         $lang = false;
 	if (isset($id)) { // if we come from prof request
-		$res = mysql_fetch_array(db_query("SELECT profname, profsurname, profuname, profemail, proftmima, comment, lang, statut 
-			FROM prof_request WHERE rid='$id'"));
+		$res = mysql_fetch_array(db_query("SELECT profname, profsurname, profuname, profemail, proftmima, comment, lang, statut
+			FROM prof_request WHERE rid='".mysql_real_escape_string(intval($id))."'"));
 		$ps = $res['profsurname'];
 		$pn = $res['profname'];
 		$pu = $res['profuname'];
@@ -149,7 +175,8 @@ $langEmail : $emailhelpdesk
                 $title = $langNewProf;
         }
 
-	$tool_content .= "<form action='$_SERVER[PHP_SELF]' method='post'>
+
+	$tool_content .= "<form action='". htmlspecialchars($_SERVER[PHP_SELF]) ."' method='post'>
 	<table width='99%' align='left' class='FormData'>
 	<tbody><tr>
 	<th width='220'>&nbsp;</th>
@@ -178,7 +205,7 @@ $langEmail : $emailhelpdesk
 	<tr>
 	<th class='left'>$langFaculty</th>
 	<td>";
-	
+
 	$dep = array();
 	$deps = db_query("SELECT id, name FROM faculte order by id");
 	while ($n = mysql_fetch_array($deps)) {

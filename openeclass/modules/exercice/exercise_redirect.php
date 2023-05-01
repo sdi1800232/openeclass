@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*========================================================================
 *   Open eClass 2.3
 *   E-learning and Course Management System
@@ -29,7 +29,7 @@ include('exercise.class.php');
 include('question.class.php');
 include('answer.class.php');
 include('exercise.lib.php');
- 
+
 $require_current_course = TRUE;
 $require_help = TRUE;
 $helpTopic = 'Exercise';
@@ -88,7 +88,7 @@ $tool_content .= "<br/><table width='99%' class='Question'>
       <tr>
       <td><br/><br/><br/><div align='center'><a href='exercice.php'>$langBack</a></div></td>
       </tr>
-      </thead></table>"; 
+      </thead></table>";
 
 draw($tool_content, 2, 'exercice');
 ?>

@@ -29,21 +29,21 @@
 	updateProgress.php
 	@last update: 22-07-2009 by Thanos Kyritsis
 	@authors list: Thanos Kyritsis <atkyritsis@upnet.gr>
-	               
+
 	based on Claroline version 1.7 licensed under GPL
 	      copyright (c) 2001, 2006 Universite catholique de Louvain (UCL)
-	      
+
 	      original file: updateProgress.php Revision: 1.11
-	      
+
 	Claroline authors: Piraux Sebastien <pir@cerdecam.be>
                       Lederer Guillaume <led@cerdecam.be>
-==============================================================================        
+==============================================================================
     @Description: This script updates the student's progress for a learning
                   path module after browsing it.
 
     @Comments:
- 
-    @todo: 
+
+    @todo:
 ==============================================================================
 */
 
@@ -60,7 +60,7 @@ $TABLELEARNPATHMODULE   = "lp_rel_learnPath_module";
 $TABLEASSET             = "lp_asset";
 $TABLEUSERMODULEPROGRESS= "lp_user_module_progress";
 
-$TOCurl = "../viewer_toc.php"; 
+$TOCurl = "../viewer_toc.php";
 $TOCleft = "../toc.php";
 
 /*********************/
@@ -69,19 +69,19 @@ $TOCleft = "../toc.php";
 
 // handling of the API form if posted by the SCORM API
 if(isset($_POST['ump_id']))
-{ 
+{
   // set values for some vars because we are not sure we will change it later
   $lesson_status_value = strtoupper($_POST['lesson_status']);
   $credit_value = strtoupper($_POST['credit']);
-  
+
   //set values for the scores
   $raw_value = (int)$_POST['raw'];
   $scoreMin_value = (int)$_POST['scoreMin'];
   $scoreMax_value = (int)$_POST['scoreMax'];
-  
+
   // next visit of the sco will not be the first so entry must be setted to RESUME
-  $entry_value = "RESUME"; 
-  
+  $entry_value = "RESUME";
+
   // Set lesson status to COMPLETED if the SCO didn't change it itself.
   if ( $lesson_status_value == "NOT ATTEMPTED" )
       $lesson_status_value = "COMPLETED";
@@ -92,7 +92,7 @@ if(isset($_POST['ump_id']))
       if ( strtoupper($_POST['credit']) == "CREDIT" )
         $credit_value = "CREDIT";
   }
-  
+
   //set maxScore to 100 if the SCO didn't change it itself, but gave raw
   if (isset($raw_value) && isset($scoreMax_value) && $raw_value > 0 && $raw_value <= 100 && $scoreMax_value == 0)
   	$scoreMax_value = 100;
@@ -111,9 +111,9 @@ if(isset($_POST['ump_id']))
   {
     $total_time_value = $_POST['total_time'];
   }
-  
-  $sql = "UPDATE `".$TABLEUSERMODULEPROGRESS."` 
-            SET 
+
+  $sql = "UPDATE `".$TABLEUSERMODULEPROGRESS."`
+            SET
                 `lesson_location` = '". addslashes($_POST['lesson_location'])."',
                 `lesson_status` = '". addslashes($lesson_status_value) ."',
                 `entry` = '". addslashes($entry_value) ."',
@@ -130,7 +130,7 @@ if(isset($_POST['ump_id']))
 
 // display the form to accept new commit and
 // refresh TOC frame, has to be done here to show recorded progression as soon as it is recorded
-            
+
 ?>
 
 <!-- API form -->
@@ -145,14 +145,14 @@ if(isset($_POST['ump_id']))
     <!--//
       parent.tocFrame.location.href="<?php echo $TOCurl; ?>";
       parent.tocleftFrame.location.href="<?php echo $TOCleft; ?>";
-    //--> 
+    //-->
     </script>
 <?php
 }
 ?>
 </head>
 <body>
-   <form name="cmiForm" method="POST" action="<?php echo $_SERVER["PHP_SELF"] ?>"> 
+   <form name="cmiForm" method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']) ?>">
 	<input type="hidden" name="ump_id" />
 	<input type="hidden" name="lesson_status" />
 	<input type="hidden" name="lesson_location" />

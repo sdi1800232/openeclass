@@ -69,7 +69,7 @@ class Question
 	function read($id)
 	{
 		global $TBL_QUESTIONS, $TBL_EXERCICE_QUESTION, $currentCourseID;
-		
+
 		mysql_select_db($currentCourseID);
 		$sql="SELECT question,description,ponderation,q_position,type FROM `$TBL_QUESTIONS` WHERE id='$id'";
 		$result=mysql_query($sql) or die("Error : SELECT in file ".__FILE__." at line ".__LINE__);
@@ -391,7 +391,7 @@ class Question
 	function save($exerciseId=0)
 	{
 		global $TBL_QUESTIONS, $currentCourseID;
-		
+
 		mysql_select_db($currentCourseID);
 
 		$id=$this->id;
@@ -473,7 +473,7 @@ class Question
 			unset($this->exerciseList[$pos]);
 
 			$sql="DELETE FROM `$TBL_EXERCICE_QUESTION` WHERE question_id='$id' AND exercice_id='$exerciseId'";
-			db_query($sql); 
+			db_query($sql);
 			return true;
 		}
 	}
@@ -491,16 +491,16 @@ class Question
 		global $TBL_EXERCICE_QUESTION, $TBL_QUESTIONS, $TBL_REPONSES;
 
 		$id=$this->id;
-		
+
 	// if the question must be removed from all exercises
 		//if($deleteFromEx === 0)
 		if(!$deleteFromEx)
 		{
 			$sql="DELETE FROM `$TBL_EXERCICE_QUESTION` WHERE question_id='$id'";
-			db_query($sql); 
+			db_query($sql);
 
 			$sql="DELETE FROM `$TBL_QUESTIONS` WHERE id='$id'";
-			db_query($sql); 
+			db_query($sql);
 
 			$sql="DELETE FROM `$TBL_REPONSES` WHERE question_id='$id'";
 			db_query($sql);
@@ -533,7 +533,7 @@ class Question
 		$position=$this->position;
 		$type=$this->type;
 
-		$sql="INSERT INTO `$TBL_QUESTIONS`(question,description,ponderation,q_position,type) 
+		$sql="INSERT INTO `$TBL_QUESTIONS`(question,description,ponderation,q_position,type)
 						VALUES('$question','$description','$weighting','$position','$type')";
 		db_query($sql,$currentCourseID);
 

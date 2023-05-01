@@ -60,6 +60,7 @@ $require_login = TRUE;
 $require_help = FALSE;
 include '../../include/baseTheme.php';
 include '../../include/sendMail.inc.php';
+include '../htmlpurifier/library/HTMLPurifier.auto.php';
 $tool_content = "";
 $lang_editor = langname_to_code($language);
 $head_content = <<<hContent
@@ -78,15 +79,21 @@ include("functions.php"); // application logic for phpBB
 /******************************************************************************
  * Actual code starts here
  *****************************************************************************/
+ $connection = new mysqli($mysqlServer, $mysqlUser, $mysqlPassword, $currentCourseID);
 
-$sql = "SELECT forum_name, forum_access, forum_type FROM forums
-	WHERE (forum_id = '$forum')";
-if (!$result = db_query($sql, $currentCourseID)) {
+ $statement = $connection->prepare("SELECT forum_name, forum_access, forum_type FROM forums WHERE (forum_id = ?)");
+ $statement->bind_param("i", $forum);
+ $statement->execute();
+ $result = $statement->get_result();
+
+if (!$result) {
 	$tool_content .= $langErrorDataForum;
 	draw($tool_content, 2, 'phpbb', $head_content);
 	exit;
 }
-$myrow = mysql_fetch_array($result);
+$row = $result->fetch_assoc();
+$statement->close();
+
 $forum_name = $myrow["forum_name"];
 $forum_access = $myrow["forum_access"];
 $forum_type = $myrow["forum_type"];
@@ -94,7 +101,7 @@ $forum_id = $forum;
 
 $nameTools = $langNewTopic;
 $navigation[]= array ("url"=>"index.php", "name"=> $langForums);
-$navigation[]= array ("url"=>"viewforum.php?forum=$forum_id", "name"=> $forum_name);
+$navigation[]= array ("url"=>"viewforum.php?forum= $forum_id", "name"=> $forum_name);
 
 if (!does_exists($forum, $currentCourseID, "forum")) {
 	//XXX: Error message in specified language
@@ -111,7 +118,7 @@ if (isset($submit) && $submit) {
 	if (!isset($username)) {
 		$username = $langAnonymous;
 	}
-	
+
 	if($forum_access == 3 && $user_level < 2) {
 		$tool_content .= $langNoPost;
 		draw($tool_content, 2, 'phpbb', $head_content);
@@ -134,6 +141,11 @@ if (isset($submit) && $submit) {
 	if ((isset($allow_bbcode) && $allow_bbcode == 1) && !($_POST['bbcode'])) {
 		$message = bbencode($message, $is_html_disabled);
 	}
+	$config = HTMLPurifier_Config::createDefault();
+	$config->set('Core.LexerImpl', 'DirectLex');
+	$config->set('HTML.Allowed', 'h1,h2,h3,h4,h5,h6,br,b,i,strong,em,a,pre,code,img,tt,div,ins,del,sup,sub,p,ol,ul,table,thead,tbody,tfoot,blockquote,dl,dt,dd,kbd,q,samp,var,hr,li,tr,td,th,s,strike');
+	$config->set('HTML.AllowedAttributes', 'img.src,*.style,*.class, code.class,a.href,*.target');
+	$purifier = new HTMLPurifier($config);
 	$message = format_message($message);
 	$subject = strip_tags($subject);
 	$poster_ip = $REMOTE_ADDR;
@@ -144,57 +156,89 @@ if (isset($submit) && $submit) {
 	if (isset($sig) && $sig) {
 		$message .= "\n[addsig]";
 	}
-	$sql = "INSERT INTO topics (topic_title, topic_poster, forum_id, topic_time, topic_notify, nom, prenom)
-			VALUES (" . autoquote($subject) . ", '$uid', '$forum', '$time', 1, '$nom', '$prenom')";
-	$result = db_query($sql, $currentCourseID);
 
-	$topic_id = mysql_insert_id();
-	$sql = "INSERT INTO posts (topic_id, forum_id, poster_id, post_time, poster_ip, nom, prenom)
-			VALUES ('$topic_id', '$forum', '$uid', '$time', '$poster_ip', '$nom', '$prenom')";
-	if (!$result = db_query($sql, $currentCourseID)) {
-		$tool_content .= $langErrorEnterPost;
-		draw($tool_content, 2, 'phpbb', $head_content);
-		exit();
-	} else {
-		$post_id = mysql_insert_id();
-		if ($post_id) {
-			$sql = "INSERT INTO posts_text (post_id, post_text)
-					VALUES ($post_id, " . autoquote($message) . ")";
-			$result = db_query($sql, $currentCourseID);
-			$sql = "UPDATE topics
-				SET topic_last_post_id = $post_id
-				WHERE topic_id = '$topic_id'";
-			$result = db_query($sql, $currentCourseID);
-		}
-	}
-	$sql = "UPDATE forums
-		SET forum_posts = forum_posts+1, forum_topics = forum_topics+1, forum_last_post_id = $post_id
-		WHERE forum_id = '$forum'";
-	$result = db_query($sql, $currentCourseID);
-	
+	$connection = new mysqli($mysqlServer, $mysqlUser, $mysqlPassword, $currentCourseID);
+    $statement = $connection->prepare("INSERT INTO topics (topic_title, topic_poster, forum_id, topic_time, topic_notify, nom, prenom) VALUES (?, ?, ?, ?, 1, ?, ?)");
+    $statement->bind_param("siisss", $subject, $uid, $forum, $time, $nom, $prenom);
+    $statement->execute();
+    $topic_id = $statement->insert_id;
+    $statement->close();
+
+    $statement = $connection->prepare("INSERT INTO posts (topic_id, forum_id, poster_id, post_time, poster_ip, nom, prenom) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $statement->bind_param("iiissss", $topic_id, $forum, $uid, $time, $poster_ip, $nom, $prenom);
+    $statement->execute();
+    $post_id = $statement->insert_id;
+    $err = $statement->errno;
+    $statement->close();
+
+    if ($err) {
+        $tool_content .= $langErrorEnterPost;
+        draw($tool_content, 2, 'phpbb', $head_content);
+        exit();
+    } else {
+        if ($post_id) {
+            $statement = $connection->prepare("INSERT INTO posts_text (post_id, post_text) VALUES (?, ?)");
+            $statement->bind_param("is", $post_id, $purifier->purify($message));
+            $statement->execute();
+            if ($statement->errno) {
+                echo $statement->errno;
+                die;
+            }
+            $statement->close();
+
+            $statement = $connection->prepare("UPDATE topics SET topic_last_post_id = ? WHERE topic_id = ?");
+            $statement->bind_param("ii", $post_id, $topic_id);
+            if ($statement->errno) {
+                echo $statement->errno;
+                die;
+            }
+            $statement->execute();
+            $statement->close();
+        }
+    }
+    $statement = $connection->prepare("UPDATE forums SET forum_posts = forum_posts+1, forum_topics = forum_topics+1, forum_last_post_id = ? WHERE forum_id = ?");
+    $statement->bind_param("ii", $post_id, $forum);
+    $statement->execute();
+    $statement->close();
+    $connection->close();
+
+
 	$topic = $topic_id;
 	$total_forum = get_total_topics($forum, $currentCourseID);
-	$total_topic = get_total_posts($topic, $currentCourseID, "topic")-1;  
+	$total_topic = get_total_posts($topic, $currentCourseID, "topic")-1;
 	// Subtract 1 because we want the nr of replies, not the nr of posts.
 	$forward = 1;
 
 	// --------------------------------
-	// notify users 
+	// notify users
 	// --------------------------------
 	$subject_notify = "$logo - $langNewForumNotify";
 	$category_id = forum_category($forum);
 	$cat_name = category_name($category_id);
-	$sql = db_query("SELECT DISTINCT user_id FROM forum_notify 
-			WHERE (forum_id = $forum OR cat_id = $category_id) 
-			AND notify_sent = 1 AND course_id = $cours_id", $mysqlMainDb);
-	$c = course_code_to_title($currentCourseID);
-	$body_topic_notify = "$langCourse: '$c'\n\n$langBodyForumNotify $langInForums '$forum_name' $langInCat '$cat_name' \n\n$gunet";
-	while ($r = mysql_fetch_array($sql)) {
-		$emailaddr = uid_to_email($r['user_id']);
-		send_mail('', '', '', $emailaddr, $subject_notify, $body_topic_notify, $charset);
-	}
+
+	$connection = new mysqli($mysqlServer, $mysqlUser, $mysqlPassword, $mysqlMainDb);
+    
+    $statement = $connection->prepare("SELECT DISTINCT user_id FROM forum_notify WHERE (forum_id = ? OR cat_id = ?) AND notify_sent = 1 AND course_id = ?");
+    $statement->bind_param("iii", $forum, $category_id, $cours_id);
+    
+
+	$statement->execute();
+    
+
+    $c = course_code_to_title($currentCourseID);
+    $body_topic_notify = "$langCourse: '$c'\n\n$langBodyForumNotify $langInForums '$forum_name' $langInCat '$cat_name' \n\n$gunet";
+   
+	$statement->bind_result($user_id);
+
+	while ($statement->fetch()) {
+        $emailaddr = uid_to_email($user_id);
+        send_mail('', '', '', $emailaddr, $subject_notify, $body_topic_notify, $charset);
+    }
+
+    $statement->close();
+    $connection->close();
 	// end of notification
-	
+
 	$tool_content .= "<table width='99%'><tbody>
 	<tr><td class='success'>
 	<p><b>$langStored</b></p>
@@ -202,7 +246,7 @@ if (isset($submit) && $submit) {
 	<p>$langClick <a href='viewforum.php?forum=$forum_id&amp;total_forum'>$langHere</a> $langReturnTopic</p>
 	</td>
 	</tr>
-	</tbody></table>"; 
+	</tbody></table>";
 } else {
 	if (!$uid AND !$fakeUid) {
 		$tool_content .= "<center><br /><br />
@@ -214,7 +258,7 @@ if (isset($submit) && $submit) {
 		draw($tool_content, 2, 'phpbb', $head_content);
 		exit();
 	}
-	$tool_content .= "<form action='$_SERVER[PHP_SELF]' method='post'>
+	$tool_content .= "<form action='". htmlspecialchars($_SERVER[PHP_SELF]) ."' method='post'>
 	<table class='FormData' width='99%'>
 	<tbody>
 	<tr>

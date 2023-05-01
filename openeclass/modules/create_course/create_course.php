@@ -31,11 +31,18 @@ $require_help = TRUE;
 $helpTopic = 'CreateCourse';
 
 include '../../include/baseTheme.php';
+include '../htmlpurifier/library/HTMLPurifier.auto.php';
 require_once("../betacms_bridge/include/bcms.inc.php");
 
 $nameTools = $langCreateCourse . " (" . $langCreateCourseStep ." 1 " .$langCreateCourseStep2 . " 3)" ;
 $tool_content = $head_content = "";
 $lang_editor = langname_to_code($language);
+
+$config = HTMLPurifier_Config::createDefault();
+$config->set('Core.LexerImpl', 'DirectLex');
+$config->set('HTML.Allowed', 'h1,h2,h3,h4,h5,h6,br,b,i,strong,em,a,pre,code,img,tt,div,ins,del,sup,sub,p,ol,ul,table,thead,tbody,tfoot,blockquote,dl,dt,dd,kbd,q,samp,var,hr,li,tr,td,th,s,strike');
+$config->set('HTML.AllowedAttributes', 'img.src,*.style,*.class, code.class,a.href,*.target');
+$purifier = new HTMLPurifier($config);
 
 $head_content .= <<<hContent
 <script type="text/javascript">
@@ -71,7 +78,7 @@ hContent;
 
 $titulaire_probable="$prenom $nom";
 
-$tool_content .= "<form method='post' name='createform' action='$_SERVER[PHP_SELF]' onsubmit=\"return checkrequired(this, 'intitule', 'titulaires');\">";
+$tool_content .= "<form method='post' name='createform' action='". htmlspecialchars($_SERVER[PHP_SELF]) ."' onsubmit=\"return checkrequired(this, 'intitule', 'titulaires');\">";
 
 // Import from BetaCMS Bridge
 doImportFromBetaCMSBeforeCourseCreation();
@@ -199,6 +206,7 @@ if (isset($_POST['back1']) or !isset($_POST['visit'])) {
 	<br />";
 
 }  elseif (isset($_POST['create3']) or isset($_POST['back2'])) {
+	$_SESSION['token'] = bin2hex(openssl_random_pseudo_bytes(32));
 	$nameTools = $langCreateCourse . " (" . $langCreateCourseStep." 3 " .$langCreateCourseStep2 . " 3 )" ;
 	@$tool_content .= "
 	<table width=\"99%\" align='left' class='FormData'>
@@ -323,6 +331,7 @@ if (isset($_POST['back1']) or !isset($_POST['visit'])) {
 	</tr>
 	<tr>
 	<th>&nbsp;</th>
+	<td><input  type=\"hidden\" name=\"token\" value='".$_SESSION['token']."'></td>
 	<td width='400'><input type='submit' name='back2' value='< $langPreviousStep '>&nbsp;
 	<input type='submit' name='create_course' value=\"$langFinalize\"></td>
 	<td><p align='right'><small>$langFieldsOptionalNote</small></p></td>
@@ -333,6 +342,11 @@ if (isset($_POST['back1']) or !isset($_POST['visit'])) {
 
 // create the course and the course database
 if (isset($_POST['create_course'])) {
+		if (empty($_POST['token']) || $_SESSION['token'] !== $_POST['token'] ) {
+          header($_SERVER['SERVER_PROTOCOL'] . ' 405 Method Not Allowed');
+          exit();
+        }
+        unset($_SESSION['token']);
 
         $nameTools = $langCourseCreate;
         $facid = intval($faculte);
@@ -372,6 +386,15 @@ if (isset($_POST['create_course'])) {
                 draw($tool_content, '1', 'create_course', $head_content);
                 exit;
         }
+				$myfile = fopen("../../courses/$repertoire/image/index.php", "a") or die("Unable to open file!"); fclose($myfile);
+				$myfile = fopen("../../courses/$repertoire/document/index.php", "a") or die("Unable to open file!"); fclose($myfile);
+				$myfile = fopen("../../courses/$repertoire/dropbox/index.php", "a") or die("Unable to open file!"); fclose($myfile);
+				$myfile = fopen("../../courses/$repertoire/page/index.php", "a") or die("Unable to open file!"); fclose($myfile);
+				$myfile = fopen("../../courses/$repertoire/work/index.php", "a") or die("Unable to open file!"); fclose($myfile);
+				$myfile = fopen("../../courses/$repertoire/group/index.php", "a") or die("Unable to open file!"); fclose($myfile);
+				$myfile = fopen("../../courses/$repertoire/temp/index.php", "a") or die("Unable to open file!"); fclose($myfile);
+				$myfile = fopen("../../courses/$repertoire/temp/scormPackages.php", "a") or die("Unable to open file!"); fclose($myfile);
+
         // ---------------------------------------------------------
         //  all the course db queries are inside the following script
         // ---------------------------------------------------------
@@ -379,22 +402,33 @@ if (isset($_POST['create_course'])) {
 
         // ------------- update main Db------------
         mysql_select_db("$mysqlMainDb");
+				$intitule = $purifier->purify($intitule);
+				$description = $purifier->purify($description);
+				$course_keywords = $purifier->purify($course_keywords);
+				$course_addon = $purifier->purify($course_addon);
 
-        db_query("INSERT INTO cours SET
-                        code = '$code',
-                        languageCourse =" . quote($language) . ",
-                        intitule = " . quote($intitule) . ",
-                        description = " . quote($description) . ",
-                        course_addon = " . quote($course_addon) . ",
-                        course_keywords = " . quote($course_keywords) . ",
-                        faculte = " . quote($facname) . ",
-                        visible = " . quote($formvisible) . ",
-                        titulaires = " . quote($titulaires) . ",
-                        fake_code = " . quote($code) . ",
-                        type = " . quote($type) . ",
-                        faculteid = '$facid',
+				$connection = new mysqli($GLOBALS['mysqlServer'], $GLOBALS['mysqlUser'], $GLOBALS['mysqlPassword'], $mysqlMainDb);
+			  
+			  $statement = $connection->prepare("INSERT INTO cours SET
+                        code = ?,
+                        languageCourse =	?,
+                        intitule = ?,
+                        description = ?,
+                        course_addon = ?,
+                        course_keywords = ?,
+                        faculte = ?,
+                        visible = ?,
+                        titulaires = ?,
+                        fake_code = ?,
+                        type = ?,
+                        faculteid = ?,
                         first_create = NOW()");
-        $new_cours_id = mysql_insert_id();
+			  $statement->bind_param("sssssssisssi", $code,$language,$intitule,$description,$course_addon,$course_keywords,$facname,$formvisible,$titulaires,$code,$type,$facid);
+			  $statement->execute();
+				$new_cours_id = $statement->insert_id;
+				$statement->close();
+				$connection->close();
+
         mysql_query("INSERT INTO cours_user SET
                         cours_id = $new_cours_id,
                         user_id = '$uid',

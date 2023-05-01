@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*========================================================================
 *   Open eClass 2.3
 *   E-learning and Course Management System
@@ -33,7 +33,7 @@ include('exercise.class.php');
 include('question.class.php');
 include('answer.class.php');
 include('exercise.lib.php');
- 
+
 $require_current_course = TRUE;
 $require_help = TRUE;
 $helpTopic = 'Exercise';
@@ -53,15 +53,15 @@ $TBL_EXERCICE_QUESTION='exercice_question';
 $TBL_EXERCICES='exercices';
 $TBL_QUESTIONS='questions';
 $TBL_REPONSES='reponses';
- 
+
 if (isset($exerciseId)) {
-	// security check 
-	$active = mysql_fetch_array(db_query("SELECT active FROM `$TBL_EXERCICES` 
+	// security check
+	$active = mysql_fetch_array(db_query("SELECT active FROM `$TBL_EXERCICES`
 		WHERE id='$exerciseId'", $currentCourseID));
 	if (($active['active'] == 0) and (!$is_allowedToEdit)) {
 		header('Location: exercice.php');
 		exit();
-	} 
+	}
 }
 
 if (!isset($_SESSION['exercise_begin_time'])) {
@@ -77,11 +77,11 @@ if(isset($buttonCancel)) {
 
 // if the user has submitted the form
 if (isset($formSent)) {
-	$CurrentAttempt = mysql_fetch_array(db_query("SELECT COUNT(*) FROM exercise_user_record 
+	$CurrentAttempt = mysql_fetch_array(db_query("SELECT COUNT(*) FROM exercise_user_record
 		WHERE eid='$eid_temp' AND uid='$uid'", $currentCourseID));
 	++$CurrentAttempt[0];
 	if (($exerciseAllowedAttemtps == 0) or ($CurrentAttempt[0] <= $exerciseAllowedAttemtps)) { // if it is allowed
-		if (isset($exerciseTimeConstrain) and $exerciseTimeConstrain != 0) { 
+		if (isset($exerciseTimeConstrain) and $exerciseTimeConstrain != 0) {
 			$exerciseTimeConstrain = $exerciseTimeConstrain*60;
 			$exerciseTimeConstrainSecs = time() - $exerciseTimeConstrain;
 			$_SESSION['exercise_end_time'] = $exerciseTimeConstrainSecs;
@@ -90,15 +90,15 @@ if (isset($formSent)) {
 				unset($_SESSION['exercise_end_time']);
 				header('Location: exercise_redirect.php');
 				exit();
-			} 
+			}
 		}
 		$RecordEndDate = date("Y-m-d H:i:s", time());
 		if (($exerciseType == 1) or (($exerciseType == 2) and ($nbrQuestions == $questionNum))) { // record
-			mysql_select_db($currentCourseID); 
+			mysql_select_db($currentCourseID);
 			$sql="INSERT INTO exercise_user_record(eid, uid, RecordStartDate, RecordEndDate, attempt)
 				VALUES ('$eid_temp','$uid','$RecordStartDate','$RecordEndDate', 1)";
 			$result=db_query($sql);
-		}	
+		}
 	} else {
 		$tool_content .= "<br/><table width='99%' class='Question'>
 		<thead><tr><td class='alert1'>$langExerciseExpired</td></tr>
@@ -108,7 +108,7 @@ if (isset($formSent)) {
 		draw($tool_content, 2, 'exercice');
 		exit();
 	}
-	
+
 	// initializing
 	if(!is_array(@$exerciseResult)) {
 		$exerciseResult=array();
@@ -190,7 +190,7 @@ if(!isset($questionNum) || $_POST['questionNum']) {
 if(@$_POST['questionNum']) {
 	$QUERY_STRING="questionNum=$questionNum";
 }
-	
+
 	$exerciseDescription_temp = nl2br(make_clickable($exerciseDescription));
 	$exerciseDescription_temp = mathfilter($exerciseDescription_temp, 12, "../../courses/mathimg/");
 	$tool_content .= <<<cData
@@ -241,9 +241,9 @@ foreach($questionList as $questionId) {
 	}
 	// shows the question and its answers
 	$tool_content .= "<br/><table width=\"99%\" class=\"Question\"><thead>
-	<tr><td colspan=\"2\"><b><u>".$langQuestion."</u>: ".$i; 
-	
-	if($exerciseType == 2) { 
+	<tr><td colspan=\"2\"><b><u>".$langQuestion."</u>: ".$i;
+
+	if($exerciseType == 2) {
 		$tool_content .= "/".$nbrQuestions;
 	}
 	$tool_content .= "</b></td></tr>";
@@ -262,17 +262,17 @@ if (!$questionList) {
 	<thead>
 	<tr><td colspan='2'><font color='red'>$langNoAnswer</font></td></tr>
 	</thead>
-	</table>";	 
+	</table>";
 } else {
 	$tool_content .= "<br/>	<table width=\"99%\" class=\"Exercise\"><tr>
 	<td><div align=\"center\"><input type=\"submit\" value=\"";
 		if ($exerciseType == 1 || $nbrQuestions == $questionNum)
 			$tool_content .= "$langCont\">&nbsp;";
-		else	
+		else
 			$tool_content .= $langNext." &gt;"."\">";
 		$tool_content .= "<input type=\"submit\" name=\"buttonCancel\" value=\"$langCancel\"></div>
 	</td></tr></table>";
-}	
+}
 
 $tool_content .= "</form>";
 draw($tool_content, 2, 'exercice');

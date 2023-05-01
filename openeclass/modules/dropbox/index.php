@@ -48,7 +48,7 @@ $action->record('MODULE_ID_DROPBOX');
 $tool_content .="
 <div id=\"operations_container\">
   <ul id=\"opslist\">
-    <li><a href=\"".$_SERVER['PHP_SELF']."?upload=1\">".$dropbox_lang['uploadFile']."</a></li>
+    <li><a href=\"".htmlspecialchars($_SERVER['PHP_SELF'])."?upload=1\">".$dropbox_lang['uploadFile']."</a></li>
   </ul>
 </div>";
 
@@ -161,8 +161,6 @@ tCont2;
 	/*
 	*  if current user is a teacher then show all users of current course
 	*/
-	if ($dropbox_person -> isCourseTutor || $dropbox_person -> isCourseAdmin
-	|| $dropbox_cnf["allowStudentToStudent"])  // RH: also if option is set
 
 	{
 		// select all users except yourself
@@ -179,13 +177,14 @@ tCont2;
 	{
 		// select all the teachers except yourself
 		$sql = "SELECT DISTINCT u.user_id , CONCAT(u.nom,' ', u.prenom) AS name
-        	FROM `" . $dropbox_cnf["userTbl"] . "` u, `" . $dropbox_cnf["courseUserTbl"] . "` cu
-        	WHERE cu.cours_id = $dropbox_cnf[cid]
-        	AND cu.user_id = u.user_id AND (cu.statut <> 5 OR cu.tutor = 1) AND u.user_id != $uid
+        	FROM " . mysql_real_escape_string($dropbox_cnf["userTbl"]) . " u, " . mysql_real_escape_string($dropbox_cnf["courseUserTbl"]) . " cu
+        	WHERE cu.cours_id = ". mysql_real_escape_string(intval($dropbox_cnf[cid])) ."
+        	AND cu.user_id = u.user_id AND (cu.statut <> 5 OR cu.tutor = 1) AND u.user_id != ". mysql_real_escape_string(intval($uid)) ."
         	ORDER BY UPPER(u.nom), UPPER(u.prenom)";
+
 	}
-	$result = db_query($sql);
-	while ($res = mysql_fetch_array($result))
+  $result = db_query($sql,$mysqlMainDb);
+  while ($res = mysql_fetch_array($result))
 	{
 		$tool_content .= "
            <option value=".$res['user_id'].">".$res['name']."</option>";
@@ -203,7 +202,7 @@ tCont2;
 		$tool_content .= '
            <option value="0">'.$dropbox_lang["justUploadInSelect"].'</option>';
 	}
-
+	
 	$tool_content .= "
         </select>
       </td>
@@ -249,7 +248,7 @@ if (!isset($_GET['mailing']))  // RH: Mailing detail: no received files
 		$dr_lang_all = addslashes( $dropbox_lang["all"]);
 		$tool_content .= "
       <th width='3' style='border: 1px solid #edecdf'>
-        <a href='dropbox_submit.php?deleteReceived=all&amp;dropbox_unid=$dr_unid' onClick=\"return confirmationall('".$dropbox_lang['all']."');\"><img src='../../images/delete.gif' title='$langDelete' /></a></th>";
+        <a href='dropbox_submit.php?deleteReceived=all&amp;dropbox_unid=$dr_unid&deleteToken=".$_SESSION['deleteToken']."' onClick=\"return confirmationall('".$dropbox_lang['all']."');\"><img src='../../images/delete.gif' title='$langDelete' /></a></th>";
 	}
 
 	$tool_content .= "</tr>
@@ -311,7 +310,7 @@ tCont9;
         <td><div class=\"cellpos\">";
 
 	$tool_content .= "
-        <a href=\"dropbox_submit.php?deleteReceived=".urlencode($w->id)."&amp;dropbox_unid=".urlencode($dropbox_unid)."\" onClick='return confirmation(\"$w->title\");'>
+        <a href=\"dropbox_submit.php?deleteReceived=".urlencode($w->id)."&amp;dropbox_unid=".urlencode($dropbox_unid)."&deleteToken=".$_SESSION['deleteToken']."\" onClick='return confirmation(\"$w->title\");'>
         <img src=\"../../template/classic/img/delete-small.png\" title=\"$langDelete\" /></a>";
 
 	$tool_content .= "</div></td></tr>";
@@ -349,7 +348,7 @@ $tool_content .= "
 	if ($numSent > 0) {
 	$tool_content .= "
         <th width='3' style='border: 1px solid #edecdf'>
-            <a href='dropbox_submit.php?deleteSent=all&amp;dropbox_unid=".urlencode( $dropbox_unid).$mailingInUrl."'
+            <a href='dropbox_submit.php?deleteSent=all&amp;dropbox_unid=".urlencode( $dropbox_unid).$mailingInUrl."&deleteToken=".$_SESSION['deleteToken']."'
 	onClick='return confirmationall('".addslashes($dropbox_lang["all"])."');'>
             <img src='../../images/delete.gif' title='$langDelete' /></a>
         </th>";
@@ -481,7 +480,7 @@ tCont12;
 	//<!--	Users cannot delete their own sent files -->
 
 	$tool_content .= "
-	<a href=\"dropbox_submit.php?deleteSent=".urlencode($w->id)."&amp;dropbox_unid=".urlencode($dropbox_unid) . $mailingInUrl."\"
+	<a href=\"dropbox_submit.php?deleteSent=".urlencode($w->id)."&amp;dropbox_unid=".urlencode($dropbox_unid) . $mailingInUrl."&deleteToken=".$_SESSION['deleteToken']."\"
 		onClick='return confirmation(\"$w->title\");'>
 		<img src=\"../../template/classic/img/delete-small.png\" title=\"$langDelete\" /></a>";
 	$tool_content .= "</div></td></tr>";

@@ -96,7 +96,7 @@ else {
     <td><br />".$langCourseDelConfirm2." <em>".htmlspecialchars($_GET['c'])."</em>;<br /><br /><i>".$langNoticeDel."</i><br /><br /></td>
   </tr>";
 	$tool_content .= "  <tr>
-    <td><ul><li><a href=\"".$_SERVER['PHP_SELF']."?c=".htmlspecialchars($_GET['c'])."&amp;delete=yes".$searchurl."\"><b>$langYes</b></a><br />&nbsp;</li>
+    <td><ul><li><a href=\"".htmlspecialchars($_SERVER['PHP_SELF'])."?c=".htmlspecialchars($_GET['c'])."&amp;delete=yes&token=".$_SESSION['token']."".$searchurl."\"><b>$langYes</b></a><br />&nbsp;</li>
   <li><a href=\"listcours.php?c=".htmlspecialchars($_GET['c'])."".$searchurl."\"><b>$langNo</b></a></li></ul></td>
   </tr>";
 	$tool_content .= "</tbody></table><br />";

@@ -51,9 +51,9 @@ $nameTools = $langGroupSpace;
 $navigation[] = array ("url"=>"group.php", "name"=> $langGroups);
 $tool_content = "";
 
-$countRegistered = mysql_num_rows(db_query("SELECT id FROM user_group 
+$countRegistered = mysql_num_rows(db_query("SELECT id FROM user_group
 	WHERE team='$userGroupId'", $currentCourse));
-$total = mysql_fetch_array(db_query("SELECT maxStudent FROM student_group 
+$total = mysql_fetch_array(db_query("SELECT maxStudent FROM student_group
 		WHERE id='$userGroupId'", $currentCourse));
 $totalRegistered = $total[0];
 
@@ -74,7 +74,7 @@ if (isset($registration)) {
 			$message="<font color=red>$langGroupNowMember</font>: ";
 			$regDone=1;
 		}
-	} else { 
+	} else {
 		$tool_content .= $langForbidden;
 		draw($tool_content, 2, 'group');
 		exit();
@@ -103,7 +103,7 @@ while ($myGroup = mysql_fetch_array($resultGroup))
 	if ($is_adminOfCourse or $is_tutor) {
 		$tool_content .= "<div id='operations_container'><ul id='opslist'>
 		<li><a href='group_edit.php?userGroupId=$userGroupId'>$langEditGroup</a></li>";
-	} elseif(isset($selfReg) and isset($uid)) { 
+	} elseif(isset($selfReg) and isset($uid)) {
 		if ($countRegistered < $totalRegistered) {
 			$tool_content .=  "<div id='operations_container'><ul id='opslist'>
 			<li>
@@ -206,9 +206,9 @@ function loadGroupTools(){
 
 	// Vars needed to determine group File Manager and group Forum
 	// They are unregistered when opening group.php once again.
-	$_SESSION['secretDirectory'] = $secretDirectory; 
+	$_SESSION['secretDirectory'] = $secretDirectory;
 	$_SESSION['forumId'] = $forumId;
-	
+
 	$group_tools = "";
 	if(isset($selfReg)) {
 		$group_tools .= "";

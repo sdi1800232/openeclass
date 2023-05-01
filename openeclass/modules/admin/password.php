@@ -73,13 +73,24 @@ if (!isset($changePass)) {
   <tr>
     <th class=\"left\">&nbsp;</th>
     <td><input type=\"submit\" name=\"submit\" value=\"$langModify\"></td>
-  </tr>
-  </tbody>
-  </table>
+	</tr>
+	</tbody>
+	</table>
 </form>";
 }
 
 elseif (isset($submit) && isset($changePass) && ($changePass == "do")) {
+	if (empty($_GET['token'])) {
+		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+						exit(); 
+}
+		
+		if ($_SESSION['token'] !== $_GET['token']) {
+		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+						exit(); 
+}
+unset($_SESSION['token']);
+
 	$userid = $_REQUEST['userid'];
 	if (empty($_REQUEST['password_form']) || empty($_REQUEST['password_form1'])) {
 		$tool_content .= mes($langFields, "", 'caution');
@@ -109,7 +120,7 @@ draw($tool_content, 3);
 function mes($message, $urlText, $type) {
 	global $urlServer, $langBack, $userid;
 
- 	$str = "<p class='$type'>$message<br /><a href='$urlServer'>$urlText</a><br /><a href='$_SERVER[PHP_SELF]?userid=$userid'>$langBack</a></p><br />";
+ 	$str = "<p class='$type'>$message<br /><a href='$urlServer'>$urlText</a><br /><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?userid=$userid'>$langBack</a></p><br />";
 	return $str;
 }
 

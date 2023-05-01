@@ -1,4 +1,5 @@
 <?php
+
 /*========================================================================
 *   Open eClass 2.3
 *   E-learning and Course Management System
@@ -84,7 +85,7 @@ $tool_content .= "<table width='99%' align='left' class='Users_Operations'>
         </td></tr>
 	</thead>
 	</table>";
-	
+
 // display tab header
 $tool_content .= "<table width='99%' class='LearnPathSum'><thead><tr>
 	<th class='left'>&nbsp;</th>

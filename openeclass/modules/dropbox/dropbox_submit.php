@@ -37,6 +37,7 @@
 
 require_once("dropbox_init1.inc.php");
 include "../../include/lib/forcedownload.php";
+include '../htmlpurifier/library/HTMLPurifier.auto.php';
 $nameTools = $dropbox_lang["dropbox"];
 
 /**
@@ -66,7 +67,7 @@ if (isset($_SESSION["dropbox_uniqueid"]) && isset($_GET["dropbox_unid"]) && $dro
 	} else {
 		$mypath = "http";
 	}
-	$mypath=$mypath."://".$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF'])."/index.php";
+	$mypath=$mypath."://".$_SERVER['HTTP_HOST'].dirname(htmlspecialchars($_SERVER['PHP_SELF']))."/index.php";
 
 	header("Location: $mypath");
 }
@@ -85,6 +86,16 @@ require_once("dropbox_class.inc.php");
  */
 if (isset($_POST["submitWork"]))
 {
+	if (empty($_GET['token'])) {
+		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+						exit(); 
+	}
+		
+		if ($_SESSION['token'] !== $_GET['token']) {
+		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+						exit(); 
+	}
+	unset($_SESSION['token']);
 	require("../../include/lib/fileUploadLib.inc.php");
 
 	$error = FALSE;
@@ -164,6 +175,10 @@ if (!isset( $_POST['authors']) || !isset( $_POST['description']))
 		}
 
 		if (!$error) {
+			$purifier = new HTMLPurifier(HTMLPurifier_Config::createDefault());
+			$dropbox_filename = $purifier->purify($dropbox_filename);
+			$author_clean = $purifier->purify($_POST['authors']);
+			$description_clean = $purifier->purify($_POST['description']);
 			// set title
 			$dropbox_title = $dropbox_filename;
 			$format = get_file_extension($dropbox_filename);
@@ -244,7 +259,7 @@ if (isset($_GET['mailingIndex']))  // examine or send
 		$sel = "SELECT u.user_id, u.nom, u.prenom, cu.statut
 				FROM `".$mysqlMainDb."`.`user` u
 				LEFT JOIN `".$mysqlMainDb."`.`cours_user` cu
-				ON cu.user_id = u.user_id AND cu.cours_id = $cours_id";
+				ON cu.user_id = u.user_id AND cu.cours_id = ". mysql_real_escape_string(intval($cours_id));
 		$sel .= " WHERE u.".$dropbox_cnf["mailingWhere".$var]." = '";
 
 		function getUser($thisRecip)
@@ -384,7 +399,7 @@ if (isset($_GET['mailingIndex']))  // examine or send
 			$sql = "SELECT u.nom, u.prenom
 					FROM `".$mysqlMainDb."`.`cours_user` cu
 					LEFT JOIN  `".$mysqlMainDb."`.`user` u
-					ON cu.user_id = u.user_id AND cu.cours_id = $cours_id
+					ON cu.user_id = u.user_id AND cu.cours_id = ". mysql_real_escape_string(intval($cours_id))."
 					WHERE cu.statut = 5
 					AND u.user_id NOT IN ('" . implode("', '" , $students) . "')";
 			$result = db_query($sql);
@@ -468,6 +483,16 @@ if (isset($_GET['mailingIndex']))  // examine or send
  */
 if (isset($_GET['deleteReceived']) || isset($_GET['deleteSent']))
 {
+	if (empty($_GET['token'])) {
+		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+						exit(); 
+	}
+		
+		if ($_SESSION['token'] !== $_GET['token']) {
+		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+						exit(); 
+	}
+	unset($_SESSION['token']);
 
 	if (isset($_GET['mailing']))  // RH
 	{

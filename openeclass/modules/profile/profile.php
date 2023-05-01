@@ -29,6 +29,7 @@ $require_login = true;
 $helpTopic = 'Profile';
 include '../../include/baseTheme.php';
 include "../auth/auth.inc.php";
+include '../htmlpurifier/library/HTMLPurifier.auto.php';
 $require_valid_uid = TRUE;
 $tool_content = "";
 
@@ -38,63 +39,72 @@ check_guest();
 $allow_username_change = !get_config('block-username-change');
 
 if (isset($submit) && (!isset($ldap_submit)) && !isset($changePass)) {
-        if (!$allow_username_change) {
-                $username_form = $uname;
-        }
-	// check if username exists
-	$username_check=mysql_query("SELECT username FROM user WHERE username='".escapeSimple($username_form)."'");
-	while ($myusername = mysql_fetch_array($username_check))
-	{
-		$user_exist=$myusername[0];
-	}
-
-	// check if there are empty fields
-	if (empty($nom_form) OR empty($prenom_form) OR empty($username_form)) {
-		header("location:". $_SERVER['PHP_SELF']."?msg=4");
-		exit();
-	}
-
-	elseif (empty($email_form) and check_prof()) {
-		header("location:". $_SERVER['PHP_SELF']."?msg=4");
-		exit();
-	}
-
-	elseif (strstr($username_form, "'") or strstr($username_form, '"') or strstr($username_form, '\\')){
-		header("location:". $_SERVER['PHP_SELF']."?msg=10");
-		exit();
-	}
-
-	// check if username is free
-	elseif(isset($user_exist) AND ($username_form==$user_exist) AND ($username_form!=$uname)) {
-		header("location:". $_SERVER['PHP_SELF']."?msg=5");
-		exit();
-	}
-
-	// check if email is valid
-	elseif (!email_seems_valid($email_form) and check_prof()) {
-		header("location:". $_SERVER['PHP_SELF']."?msg=6");
-		exit();
-	}
-
-	// everything is ok
-	else {
-		##[BEGIN personalisation modification]############
-		$_SESSION['langswitch'] = $language = langcode_to_name($_REQUEST['userLanguage']);
-		$langcode = langname_to_code($language);
-
-		$username_form = escapeSimple($username_form);
-		if(mysql_query("UPDATE user
-	        SET nom='$nom_form', prenom='$prenom_form',
-	        username='$username_form', email='$email_form', am='$am_form',
-	            perso='$persoStatus', lang='$langcode'
-	        WHERE user_id='".$_SESSION["uid"]."'")) {
-			if (isset($_SESSION['user_perso_active']) and $persoStatus == "no") {
-                		unset($_SESSION['user_perso_active']);
+	if (!empty($_POST['token'])) {
+		if (($_SESSION['token'] === $_POST['token'])) {
+			// Proceed to process the form data
+			if (!$allow_username_change) {
+			$username_form = $uname;
 			}
-			header("location:". $_SERVER['PHP_SELF']."?msg=1");
-			exit();
-	        }
-	}
+			// check if username exists
+			$username_check=mysql_query("SELECT username FROM user WHERE username='".escapeSimple($username_form)."'");
+			while ($myusername = mysql_fetch_array($username_check))
+			{
+				$user_exist=$myusername[0];
+			}
+
+			// check if there are empty fields
+			if (empty($nom_form) OR empty($prenom_form) OR empty($username_form)) {
+				header("location:". htmlspecialchars($_SERVER['PHP_SELF'])."?msg=4");
+				exit();
+			}
+
+			elseif (empty($email_form) and check_prof()) {
+				header("location:". htmlspecialchars($_SERVER['PHP_SELF'])."?msg=4");
+				exit();
+			}
+
+			elseif (strstr($username_form, "'") or strstr($username_form, '"') or strstr($username_form, '\\')){
+				header("location:". htmlspecialchars($_SERVER['PHP_SELF'])."?msg=10");
+				exit();
+			}
+
+			// check if username is free
+			elseif(isset($user_exist) AND ($username_form==$user_exist) AND ($username_form!=$uname)) {
+				header("location:". htmlspecialchars($_SERVER['PHP_SELF'])."?msg=5");
+				exit();
+			}
+
+			// check if email is valid
+			elseif (!email_seems_valid($email_form) and check_prof()) {
+				header("location:". htmlspecialchars($_SERVER['PHP_SELF'])."?msg=6");
+				exit();
+			}
+
+			// everything is ok
+			else {
+				##[BEGIN personalisation modification]############
+				$_SESSION['langswitch'] = $language = langcode_to_name($_REQUEST['userLanguage']);
+				$langcode = langname_to_code($language);
+				$purifier = new HTMLPurifier(HTMLPurifier_Config::createDefault());
+
+				$username_form = escapeSimple($username_form);
+				$connection = new mysqli($mysqlServer, $mysqlUser, $mysqlPassword, $mysqlMainDb);
+				$statement = $connection->prepare("UPDATE user SET nom=?, prenom=?, username=?, email=?, am=?, perso=?, lang=? WHERE user_id=?");
+				$purifier = new HTMLPurifier(HTMLPurifier_Config::createDefault());
+				$statement->bind_param("sssssssi",$purifier->purify($nom_form),$purifier->purify($prenom_form),$purifier->purify($username_form),$purifier->purify($email_form),$purifier->purify($am_form),$persoStatus,$langcode,$_SESSION["uid"]);
+				$statement->execute();
+
+				$err = $statement->error;
+				$statement->close();
+				$connection->close();
+				if (!$err) {
+					if (isset($_SESSION['user_perso_active']) and $persoStatus == "no") {
+						unset($_SESSION['user_perso_active']);
+					}
+					header("location:". htmlspecialchars($_SERVER['PHP_SELF'])."?msg=1");
+					exit();
+					}
+			}
 }	// if submit
 
 ##[BEGIN personalisation modification - For LDAP users]############
@@ -104,12 +114,12 @@ if (isset($submit) && isset($ldap_submit) && ($ldap_submit == "ON")) {
 
 	mysql_query("UPDATE user SET perso = '$persoStatus',
 		lang = '$langcode' WHERE user_id='".$_SESSION["uid"]."' ");
-	
+
 	if (isset($_SESSION['user_perso_active']) and $persoStatus == "no") {
 		unset($_SESSION['user_perso_active']);
 	}
 
-	header("location:". $_SERVER['PHP_SELF']."?msg=1");
+	header("location:". htmlspecialchars($_SERVER['PHP_SELF'])."?msg=1");
 	exit();
 }
 ##[END personalisation modification]############
@@ -229,7 +239,7 @@ if ((!isset($changePass)) || isset($_POST['submit'])) {
 	} else {
 		$tool_content .= "<td><input class='FormData_InputText' type=\"text\" size=\"40\" name=\"prenom_form\" value=\"$prenom_form\"></td>";
 	}
-	
+
 	$tool_content .= "</tr>
     <tr>
        <th class='left'>$langSurname</th>";
@@ -281,7 +291,7 @@ if ((!isset($changePass)) || isset($_POST['submit'])) {
 		$tool_content .= "<td><input class='FormData_InputText' type=\"text\" size=\"40\" name=\"email_form\" value=\"$email_form\"></td>";
 	}
     $tool_content .= "</tr><tr>
-        <th class='left'>$langAm</th>
+	<th class='left'>$langAm</th>
         <td><input class='FormData_InputText' type=\"text\" size=\"40\" name=\"am_form\" value=\"$am_form\"></td>
     </tr>";
 	##[BEGIN personalisation modification]############

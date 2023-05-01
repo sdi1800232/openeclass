@@ -39,6 +39,7 @@ $tool_content = "";
 include '../../include/baseTheme.php';
 include 'auth.inc.php';
 include('../../include/sendMail.inc.php');
+include '../htmlpurifier/library/HTMLPurifier.auto.php';
 $nameTools = $lang_remind_pass;
 
 function check_password_editable($password)
@@ -109,7 +110,7 @@ if (isset($_REQUEST['do']) && $_REQUEST['do'] == "go") {
         }
 
 	$tool_content .= $lang_pass_intro;
-
+	
 	$tool_content .= "<form method=\"post\" action=\"".$REQUEST_URI."\">
 		<table>
 		<thead>
@@ -129,7 +130,20 @@ if (isset($_REQUEST['do']) && $_REQUEST['do'] == "go") {
 	</form>";
 
 } elseif (!isset($_REQUEST['do'])) {
+
+	if (empty($_GET['token'])) {
+		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+						exit(); 
+	}
+		
+		if ($_SESSION['token'] !== $_GET['token']) {
+		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+						exit(); 
+	}
+	unset($_SESSION['token']);
 	/***** If valid e-mail address was entered, find user and send email *****/
+	$purifier = new HTMLPurifier(HTMLPurifier_Config::createDefault());
+	$userName = $purifier->purify($userName);
 	$res = db_query("SELECT user_id, nom, prenom, username, password, statut FROM user
 			WHERE email = '" . mysql_escape_string($email) . "'
 			AND BINARY username = '" . mysql_escape_string($userName) . "'", $mysqlMainDb);

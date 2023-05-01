@@ -500,7 +500,7 @@ if (isset($fileNameList))
                         <img src=\"../../template/classic/img/delete.gif\" border=0></a></td>\n";
                 } else {
                         $tool_content .= "<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>\n";
-                } 
+                }
 		$tool_content .= "\n    </tr>\n";
 	}
 }

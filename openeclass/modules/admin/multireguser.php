@@ -21,6 +21,13 @@ $error = '';
 $acceptable_fields = array('first', 'last', 'email', 'id', 'phone', 'username');
 
 if (isset($_POST['submit'])) {
+        if (empty($_POST['token']) || $_SESSION['token'] !== $_POST['token'] ) {
+		header($_SERVER['SERVER_PROTOCOL'] . ' 405 Method Not Allowed');
+		exit(); 
+	}
+	unset($_SESSION['token']);
+
+
         $send_mail = isset($_POST['send_mail']) && $_POST['send_mail'];
         $unparsed_lines = '';
         $new_users_info = array();
@@ -107,12 +114,13 @@ if (isset($_POST['submit'])) {
         }
         $tool_content .= "</table>\n";
 } else {
+        
         $req = db_query("SELECT id, name FROM faculte order by id");
         while ($n = mysql_fetch_array($req)) {
                 $facs[$n['id']] = $n['name'];
         }
         $tool_content .= "$langMultiRegUserInfo
-<form method='post' action='$_SERVER[PHP_SELF]'>
+<form method='post' action='". htmlspecialchars($_SERVER[PHP_SELF]) ."'>
 <table class='FormData'>
 <tr><th>$langMultiRegFields</th>
     <td><input type='text' name='fields' size='50' value='first last id email phone' /></td>
@@ -144,6 +152,7 @@ if (isset($_POST['submit'])) {
     <td><input type='submit' name='submit' value='$langSubmit' /></td>
 </tr>
 </table>
+
 </form>";
 }
 
@@ -246,4 +255,3 @@ function register($uid, $course_code)
         }
         return false;
 }
-

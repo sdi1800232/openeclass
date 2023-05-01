@@ -40,6 +40,9 @@
 
 include '../../include/baseTheme.php';
 include 'auth.inc.php';
+include '../htmlpurifier/library/HTMLPurifier.auto.php';
+
+$purifier = new HTMLPurifier(HTMLPurifier_Config::createDefault());
 
 $navigation[]= array ("url"=>"registration.php", "name"=> "$langNewUser");
 
@@ -67,6 +70,10 @@ if (isset($p) and ($p)) {
 } else {
 	$tool_content .= "<form method='post' action='ldapsearch.php'>";
 }
+$ldap_email = $purifier->purify(mysql_real_escape_string($ldap_email));
+$ldap_passwd = mysql_real_escape_string($purifier->purify($ldap_passwd));
+$auth = mysql_real_escape_string($purifier->purify($auth));
+
 @$tool_content .= "<table width='99%' style='border: 1px solid #edecdf;'>
 	<thead><tr><td>
 	<table width=\"99%\" class='FormData' align='left'>

@@ -1,4 +1,5 @@
-<? 
+<?
+die();
 /*========================================================================
 *   Open eClass 2.3
 *   E-learning and Course Management System
@@ -28,10 +29,10 @@
 	ldapsearch.php
 	@authors list: Karatzidis Stratos <kstratos@uom.gr>
 		       Vagelis Pitsioygas <vagpits@uom.gr>
-==============================================================================        
+==============================================================================
   @Description: This script/file tries to authenticate the user, using
   his user/pass pair and the authentication method defined by the admin
-  
+
 ==============================================================================
 */
 
@@ -101,12 +102,12 @@ if(!empty($is_submit)) {
 				break;
 		}
 		$is_valid = auth_user_login($auth,$ldap_email,$ldap_passwd);
-	}	
+	}
 
-	if ($is_valid) { // connection successful	
+	if ($is_valid) { // connection successful
 		$tool_content .= "<table width='99%' style='border: 1px solid #edecdf;'>
 		<thead><tr><td>
-		<form action='$_SERVER[PHP_SELF]' method='post'>" .
+		<form action='". htmlspecialchars($_SERVER[PHP_SELF]) ."' method='post'>" .
 		(isset($GLOBALS['auth_user_info'])?
 		('<input type="hidden" name="prenom_form" value="' . $GLOBALS['auth_user_info']['firstname'] .
 		'" /><input type="hidden" name="nom_form" value="' . $GLOBALS['auth_user_info']['lastname'] .
@@ -148,7 +149,7 @@ if(!empty($is_submit)) {
 		<th class='left'>$langLanguage</th>
 		<td>";
 		$tool_content .= lang_select_options('localize');
-		$tool_content .= "</td></tr>	
+		$tool_content .= "</td></tr>
 		<tr>
 		<th class='left'>&nbsp;</th>
 		<td><input type=\"submit\" name=\"submit\" value=\"".$langRegistration."\" />
@@ -173,7 +174,7 @@ if(!empty($is_submit)) {
 if (isset($submit))  {
 	$uname = $_POST['uname'];
 	$uname = escapeSimple($uname);
-	
+
 	// check if there are empty fields
 	if (empty($nom_form) or empty($prenom_form) or empty($userphone)
 	 or empty($usercomment) or empty($uname) or (empty($email))) {
@@ -184,7 +185,7 @@ if (isset($submit))  {
 		draw($tool_content,0);
 		exit();
 	}
-	
+
 	$username = $uname;
 	$auth = $_POST['auth'];
 	if($auth!=1) {
@@ -207,19 +208,19 @@ if (isset($submit))  {
 	$surname = $nom_form;
 	$name = $prenom_form;
 	$depid = intval($department);
-	
+
 	$sql = "INSERT INTO prof_request(profname, profsurname, profuname, profpassword,
 		profemail, proftmima, profcomm, status, date_open, comment, lang, statut) VALUES(
 		'$name','$surname','$username','$password','$usermail','$depid','$userphone',
 		1, NOW(), '$usercomment', '$lang', 1)";
 	$upd = db_query($sql,$mysqlMainDb);
-	
+
 	// send email
         $MailMessage = $mailbody1 . $mailbody2 . "$name $surname\n\n" . $mailbody3
         . $mailbody4 . $mailbody5 . "$mailbody6\n\n" . "$langFaculty: " . find_faculty_by_id($department) . "
 	\n$langComments: $usercomment\n"
         . "$langProfUname : $username\n$langProfEmail : $usermail\n" . "$contactphone : $userphone\n\n\n$logo\n\n";
-	
+
 	if (!send_mail('', $emailhelpdesk, $gunet, $emailhelpdesk, $mailsubject, $MailMessage, $charset)) {
 		$tool_content .= "<table width=\"99%\"><tbody>
 		<tr><td class=\"caution\" height='60'>

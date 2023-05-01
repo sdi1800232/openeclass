@@ -60,7 +60,7 @@ $head_content ='<script type="text/javascript">
                 }
                 return true;
         	}
-	
+
 		function checkForm (frm) {
                 if (frm.elements["recipients[]"].selectedIndex < 0) {
                         alert("'.$dropbox_lang['noUserSelected'].'");
@@ -91,13 +91,13 @@ $dropbox_cnf["courseUserTbl"] = "cours_user";
  *       INITIALISE OTHER VARIABLES & CONSTANTS
  * --------------------------------------
  */
-$dropbox_cnf["courseId"] = $currentCourseID;
-$dropbox_cnf["cid"] = $cours_id;
-$dropbox_cnf["sysPath"] = $webDir."courses/".$currentCourseID."/dropbox"; //path to dropbox subdir in course containing the uploaded files
+$dropbox_cnf["courseId"] = mysql_real_escape_string($currentCourseID);
+$dropbox_cnf["cid"] = mysql_real_escape_string(intval($cours_id));
+$dropbox_cnf["sysPath"] = $webDir."courses/".mysql_real_escape_string($currentCourseID)."/dropbox"; //path to dropbox subdir in course containing the uploaded files
 if (!is_dir($dropbox_cnf["sysPath"])) {
 	mkdir($dropbox_cnf["sysPath"]);
-} 
-	
+}
+
 // get dropbox quotas from database
 $d = mysql_fetch_array(db_query("SELECT dropbox_quota FROM `".$mysqlMainDb."`.`cours` WHERE code='$currentCourseID'"));
 $diskQuotaDropbox = $d['dropbox_quota'];
@@ -129,14 +129,26 @@ $dropbox_cnf["mailingFileRegexp"] = '/^(.+)\.\w{1,4}$/';
 function getUserNameFromId ($id)  // RH: Mailing: return 'Mailing ' + id
 {
     global $dropbox_cnf, $dropbox_lang, $mysqlMainDb;
-
     $mailingId = $id - $dropbox_cnf["mailingIdBase"];
     if ($mailingId > 0) return $dropbox_lang["mailingAsUsername"] . $mailingId;
 
-    $sql = "SELECT CONCAT(nom,' ', prenom) AS name
-		FROM `" . $dropbox_cnf["userTbl"] . "` WHERE user_id='" . addslashes($id) . "'";
-    $result = db_query($sql, $mysqlMainDb);
-    $res = mysql_fetch_array($result);
+    $connection = new mysqli($GLOBALS['mysqlServer'], $GLOBALS['mysqlUser'], $GLOBALS['mysqlPassword'], $mysqlMainDb);
+
+
+    $statement = $connection->prepare("SELECT CONCAT(nom,' ', prenom) AS name FROM ".$dropbox_cnf["userTbl"]." WHERE user_id = ? ");
+    
+    
+    $statement->bind_param("i",$id);
+    
+    $statement->execute();
+    
+    $result = $statement->get_result();
+    
+    $res = $result->fetch_array();
+    
+    $statement->close();
+    
+    $connection->close();
     if ($res == FALSE) return FALSE;
     return stripslashes($res["name"]);
 }
@@ -148,9 +160,20 @@ function getLoginFromId ($id)
 {
     global $dropbox_cnf, $dropbox_lang, $mysqlMainDb;
 
-    $sql = "SELECT username FROM `" . $dropbox_cnf["userTbl"] . "` WHERE user_id='" . addslashes($id) . "'";
-    $result = db_query($sql,$mysqlMainDb);
-    $res = mysql_fetch_array($result);
+    $connection = new mysqli($GLOBALS['mysqlServer'], $GLOBALS['mysqlUser'], $GLOBALS['mysqlPassword'], $mysqlMainDb);
+
+    $statement = $connection->prepare("SELECT username FROM ".$dropbox_cnf["userTbl"]." WHERE user_id= ?");
+    $statement->bind_param("i",$id);
+    
+    if(false===$statement->execute()){
+      die(' execute() failed: ' . htmlspecialchars($statement->error));
+    }
+    $result = $statement->get_result();
+    $res = $result->fetch_array();
+    
+    $statement->close();
+    $connection->close();
+
     if ($res == FALSE) return FALSE;
     return stripslashes( $res["username"]);
 }
@@ -162,15 +185,24 @@ function isCourseMember($id)
 {
     global $dropbox_cnf, $dropbox_lang, $mysqlMainDb;
 
-    $sql = "SELECT * FROM `" . $dropbox_cnf["courseUserTbl"] . "`
-		WHERE user_id = '" . addslashes( $id) . "' AND cours_id = '" . $dropbox_cnf["cid"] . "'";
-    $result = db_query($sql, $mysqlMainDb); 
-    if (mysql_num_rows($result) == 1)
+    $connection = new mysqli($GLOBALS['mysqlServer'], $GLOBALS['mysqlUser'], $GLOBALS['mysqlPassword'], $mysqlMainDb);
+
+    $statement = $connection->prepare("SELECT * FROM " . $dropbox_cnf["courseUserTbl"] . " WHERE user_id = ? AND cours_id = ?");
+    $statement->bind_param("ii",$id,$dropbox_cnf["cid"]);
+    if(false===$statement->execute()){
+  die('execute() failed: ' . htmlspecialchars($statement->error));
+}
+    $result = $statement->get_result();
+    if (mysqli_num_rows($result) == 1)
     {
+        $statement->close();
+        $connection->close();
         return TRUE;
     }
     else
     {
+        $statement->close();
+        $connection->close();
         return FALSE;
     }
 }
@@ -218,7 +250,7 @@ function checkUserOwnsThisMailing($mailingPseudoId, $userId)
 
     $sql = "SELECT f.uploaderId FROM `" . $dropbox_cnf["fileTbl"] . "` f
 			LEFT JOIN `" . $dropbox_cnf["postTbl"] . "` p ON f.id = p.fileId
-			WHERE p.recipientId = '" . $mailingPseudoId . "'";
+			WHERE p.recipientId = " . mysql_real_escape_string(intval($mailingPseudoId));
     $result = db_query($sql, $currentCourseID);
 
     if ($res = mysql_fetch_array($result))
@@ -244,7 +276,7 @@ function removeMoreIfMailing($fileId)
 	    $mailingPseudoId = $res['recipientId'];
 	    if ($mailingPseudoId > $dropbox_cnf["mailingIdBase"])
 	    {
-	        $sql = "DELETE FROM `" . $dropbox_cnf["personTbl"] . "` WHERE personId='" . $mailingPseudoId . "'";
+	        $sql = "DELETE FROM `" . $dropbox_cnf["personTbl"] . "` WHERE personId=" . mysql_real_escape_string(intval($mailingPseudoId));
 	        $result1 = db_query($sql, $currentCourseID);
         }
     }

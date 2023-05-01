@@ -29,20 +29,20 @@
 	exercise.php
 	@last update: 30-06-2006 by Thanos Kyritsis
 	@authors list: Thanos Kyritsis <atkyritsis@upnet.gr>
-	               
+
 	based on Claroline version 1.7 licensed under GPL
 	      copyright (c) 2001, 2006 Universite catholique de Louvain (UCL)
-	      
+
 	      original file: exercise.inc.php Revision: 1.14.2.3
-	      
+
 	Claroline authors: Piraux Sebastien <pir@cerdecam.be>
                       Lederer Guillaume <led@cerdecam.be>
-==============================================================================        
+==============================================================================
     @Description:
 
     @Comments:
- 
-    @todo: 
+
+    @todo:
 ==============================================================================
 */
 
@@ -85,7 +85,7 @@ if( isset($learningPath_module['lock'])
 	&& $learningPath_module['lock'] == 'CLOSE'
 	&& isset($learningPath_module['raw_to_pass']) )
 {
-	$tool_content .= '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">'."\n"
+	$tool_content .= '<form method="POST" action="'.htmlspecialchars($_SERVER['PHP_SELF']).'">'."\n"
 		.'<label for="newRaw">'.$langChangeRaw.'</label>'."\n"
 		.'<input type="text" value="'.htmlspecialchars( $learningPath_module['raw_to_pass'] ).'" name="newRaw" id="newRaw" size="3" maxlength="3" /> % '."\n"
 		.'<input type="hidden" name="cmd" value="raw" />'."\n"
@@ -113,7 +113,7 @@ if( $module )
 		.'<img src="'.$imgRepositoryWeb.'edit.gif" border="0" alt="'.$langModify.'" title="'.$langModify.'" />'
 		.'</a>'."\n"
 		.'</p>'."\n";
-		
+
 	$tool_content .= '<hr noshade="noshade" size="1" />';
 } // else sql error, do nothing except in debug mode, where claro_sql_query_fetch_all will show the error
 

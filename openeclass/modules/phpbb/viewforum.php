@@ -69,7 +69,7 @@ $paging = true;
 $next = 0;
 
 include_once("./config.php");
-include("functions.php"); 
+include("functions.php");
 
 $forum = intval($_GET['forum']);
 
@@ -84,21 +84,21 @@ $tool_content .= "<li><a href='newtopic.php?forum=$forum'>$langNewTopic</a></li>
 /*
 * Retrieve and present data from course's forum
 */
-
+$forum = mysql_real_escape_string(intval($forum));
 $sql = "SELECT f.forum_type, f.forum_name
 	FROM forums f
 	WHERE forum_id = '$forum'";
 
 $result = db_query($sql, $currentCourseID);
 $myrow = mysql_fetch_array($result);
- 
+
 $forum_name = own_stripslashes($myrow["forum_name"]);
 $nameTools = $forum_name;
 
 $topic_count = mysql_fetch_row(db_query("SELECT COUNT(*) FROM topics WHERE forum_id = '$forum'"));
 $total_topics = $topic_count[0];
 
-if ($total_topics > $topics_per_page) { 
+if ($total_topics > $topics_per_page) {
 	$pages = intval($total_topics / $topics_per_page) + 1; // get total number of pages
 }
 
@@ -109,52 +109,59 @@ if (isset($_GET['start'])) {
 }
 
 if ($total_topics > $topics_per_page) { // navigation
-	$base_url = "viewforum.php?forum=$forum&amp;start="; 
+	$base_url = "viewforum.php?forum=$forum&amp;start=";
 	$tool_content .= "<table width='99%'><tr>";
 	$tool_content .= "<td width='50%' align='left'><span class='row'><strong class='pagination'>
 		<span class='pagination'>$langPages:&nbsp;";
-	$current_page = $first_topic / $topics_per_page + 1; // current page 
+	$current_page = $first_topic / $topics_per_page + 1; // current page
 	for ($x = 1; $x <= $pages; $x++) { // display navigation numbers
 		if ($current_page == $x) {
 			$tool_content .= "$x";
-		} else { 
+		} else {
 			$start = ($x-1)*$topics_per_page;
 			$tool_content .= "<a href='$base_url&amp;start=$start'>$x</a>";
 		}
 	}
 	$tool_content .= "</span></strong></span></td>";
 	$tool_content .= "<td colspan='4' align='right'>";
-	
+
 	$next = $first_topic + $topics_per_page;
 	$prev = $first_topic - $topics_per_page;
 	if ($prev < 0) {
 		$prev = 0;
 	}
-	
+
 	if ($first_topic == 0) { // beginning
 		$tool_content .= "<a href='$base_url$next'>$langNextPage</a>";
-	} elseif ($first_topic + $topics_per_page < $total_topics) { 
+	} elseif ($first_topic + $topics_per_page < $total_topics) {
 		$tool_content .= "<a href='$base_url$prev'>$langPreviousPage</a>&nbsp|&nbsp;
-		<a href='$base_url$next'>$langNextPage</a>";	
+		<a href='$base_url$next'>$langNextPage</a>";
 	} elseif ($start - $topics_per_page < $total_topics) { // end
 		$tool_content .= "<a href='$base_url$prev'>$langPreviousPage</a>";
-	} 
+	}
 	$tool_content .= "</td></tr></table>";
 }
 
 if(isset($topicnotify)) { // modify topic notification
-	$rows = mysql_num_rows(db_query("SELECT * FROM forum_notify 
-		WHERE user_id = $uid AND topic_id = $topic_id AND course_id = $cours_id", $mysqlMainDb));
+	
+	$cours_id = mysql_real_escape_string(intval($cours_id));
+
+
+	$topicnotify = mysql_real_escape_string(intval($topicnotify));
+
+	$topic_id = mysql_real_escape_string(intval($topic_id));
+
+	$uid = mysql_real_escape_string(intval($uid));
+
+	$rows = mysql_num_rows(db_query("SELECT * FROM forum_notify WHERE user_id = $uid AND topic_id = $topic_id AND course_id = $cours_id", $mysqlMainDb));
 	if ($rows > 0) {
-		db_query("UPDATE forum_notify SET notify_sent = '$topicnotify' 
-			WHERE user_id = $uid AND topic_id = $topic_id AND course_id = $cours_id", $mysqlMainDb);
+		db_query("UPDATE forum_notify SET notify_sent = '$topicnotify' WHERE user_id = $uid AND topic_id = $topic_id AND course_id = $cours_id", $mysqlMainDb);
 	} else {
-		db_query("INSERT INTO forum_notify SET user_id = $uid,
-		topic_id = $topic_id, notify_sent = 1, course_id = $cours_id", $mysqlMainDb);
+		db_query("INSERT INTO forum_notify SET user_id = $uid, topic_id = $topic_id, notify_sent = 1, course_id = $cours_id", $mysqlMainDb);
 	}
 }
 
-// header 
+// header
 $tool_content .= "<table width='99%' class='ForumSum'><thead><tr>
 <td class='ForumHead' colspan='2'>&nbsp;$langSubject</td>
 <td class='ForumHead' width='100'>$langAnswers</td>
@@ -167,7 +174,7 @@ $tool_content .= "<table width='99%' class='ForumSum'><thead><tr>
 $sql = "SELECT t.*, p.post_time, p.nom AS nom1, p.prenom AS prenom1
         FROM topics t
         LEFT JOIN posts p ON t.topic_last_post_id = p.post_id
-        WHERE t.forum_id = '$forum' 
+        WHERE t.forum_id = '$forum'
         ORDER BY topic_time DESC LIMIT $first_topic, $topics_per_page";
 
 $result = db_query($sql, $currentCourseID);
@@ -237,8 +244,13 @@ if (mysql_num_rows($result) > 0) { // topics found
 		$tool_content .= "<td class='Forum_leftside1'>$myrow[prenom] $myrow[nom]</td>\n";
 		$tool_content .= "<td class='Forum_leftside'>$myrow[topic_views]</td>\n";
 		$tool_content .= "<td class='Forum_leftside1'>$myrow[prenom1] $myrow[nom1]<br />$last_post</td>";
-		list($topic_action_notify) = mysql_fetch_row(db_query("SELECT notify_sent FROM forum_notify 
-			WHERE user_id = $uid AND topic_id = $myrow[topic_id] AND course_id = $cours_id", $mysqlMainDb));
+		
+		$uid = mysql_real_escape_string(intval($uid));
+		
+		$cours_id = mysql_real_escape_string(intval($cours_id));
+
+		$clean_topic_id = mysql_real_escape_string(intval($myrow[topic_id]));
+		list($topic_action_notify) = mysql_fetch_row(db_query("SELECT notify_sent FROM forum_notify WHERE user_id = $uid AND topic_id = $clean_topic_id AND course_id = $cours_id", $mysqlMainDb));
 		if (!isset($topic_action_notify)) {
 			$topic_link_notify = FALSE;
 			$topic_icon = '_off';
@@ -248,10 +260,10 @@ if (mysql_num_rows($result) > 0) { // topics found
 		}
 		$tool_content .= "<td class='Forum_leftside' style='text-align:center'>";
 		if (isset($_GET['start']) and $_GET['start'] > 0) {
-			$tool_content .= "<a href='$_SERVER[PHP_SELF]?forum=$forum&start=$_GET[start]&amp;topicnotify=$topic_link_notify&amp;topic_id=$myrow[topic_id]'>
+			$tool_content .= "<a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?forum=$forum&start=$_GET[start]&amp;topicnotify=$topic_link_notify&amp;topic_id=$myrow[topic_id]'>
 			<img src='../../template/classic/img/announcements$topic_icon.gif' title='$langNotify'></img></a>";
 		} else {
-			$tool_content .= "<a href='$_SERVER[PHP_SELF]?forum=$forum&amp;topicnotify=$topic_link_notify&amp;topic_id=$myrow[topic_id]'>
+			$tool_content .= "<a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?forum=$forum&amp;topicnotify=$topic_link_notify&amp;topic_id=$myrow[topic_id]'>
 			<img src='../../template/classic/img/announcements$topic_icon.gif' title='$langNotify'></img></a>";
 		}
 		$tool_content .= "</td></tr>";

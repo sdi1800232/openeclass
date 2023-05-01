@@ -136,7 +136,7 @@ function startElement($parser,$name,$attributes)
                         if (isset($attributes['HREF'])) $manifestData['scos'][$attributes['IDENTIFIER']]['href'] = $attributes['HREF'];
 
                         if (isset($attributes['XML:BASE'])) $manifestData['scos'][$attributes['IDENTIFIER']]['xml:base'] = $attributes['XML:BASE'];
-                        
+
                         // eidiko flag gia na anixneusoume osa scorm paketa einai typou assets
                         // dhladh osa den perilambanoun javascript gia thn parakolou8hsh ths proodou,
                         // opote allou ston kwdika 8a prepei na ta xeiristoume diaforetika
@@ -313,7 +313,7 @@ function elementData($parser,$data)
                 if ( !($fp = @fopen($file, "r")) )
                 {
                 	$file = str_replace("\\", "/", $file); // kanoume mia dokimh mhn tyxon do8hke la8os dir separator, antistrefontas tis ka8etous. ta windows paizoun kai me to unix dir separator
-                	
+
                 	$unzippingState = $zipFile->extract(PCLZIP_OPT_BY_NAME,$pathToManifest.$file, PCLZIP_OPT_REMOVE_PATH, $pathToManifest);
                 	if ( !($fp = @fopen($file, "r")) )
 	                {
@@ -321,7 +321,7 @@ function elementData($parser,$data)
 	                    array_push ($errorMsgs, $langErrorOpeningXMLFile.$pathToManifest.$file );
                 	}
                 }
-                
+
                 if (!$errorFound)
                 {
                     if (!isset($cache)) $cache = "";
@@ -983,7 +983,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !is_null($_POST) )
                 // create new module
 
                 if (!isset($item['datafromlms'])) $item['datafromlms'] = "";
-                
+
                 // elegxoume an to contentType prepei na einai scorm h asset
                 if (isset($manifestData['scos'][$item['identifierref']]['contentTypeFlag']) && $manifestData['scos'][$item['identifierref']]['contentTypeFlag'] == CTSCORMASSET_)
                 	$contentType = CTSCORMASSET_;
@@ -1225,7 +1225,7 @@ else // if method == 'post'
       UPLOAD FORM
      --------------------------------------*/
     $tool_content .= "
-    <form enctype=\"multipart/form-data\" action=\"".$_SERVER['PHP_SELF']."\" method=\"post\">
+    <form enctype=\"multipart/form-data\" action=\"".htmlspecialchars($_SERVER['PHP_SELF'])."\" method=\"post\">
     <table width=\"99%\" align=\"left\" class=\"FormData\">
     <tbody>
     <tr>
@@ -1249,8 +1249,8 @@ else // if method == 'post'
     <br />
     </form>
     <p>";
-    
-    
+
+
     /*****************************************
      *  IMPORT SCORM DIRECTLY FROM DOCUMENTS
      *****************************************/
@@ -1273,7 +1273,7 @@ else // if method == 'post'
 		'copyrighted' => $row['copyrighted'],
 		'date' => strtotime($row['date_modified']));
     }
-    
+
     if (mysql_num_rows($sql) != 0) {
 		$tool_content .= "\n<div class=\"fileman\">";
 		$tool_content .= "\n<form action='importFromDocument.php' method='post'>";
@@ -1291,18 +1291,18 @@ else // if method == 'post'
 		foreach ($fileinfo as $entry) {
 		    if ($entry['is_dir']) // do not handle directories
 		      continue;
-	
+
 		    $cmdDirName = $entry['path'];
 		    $copyright_icon = '';
 		    $image = '../document/img/' . choose_image('.' . $entry['format']);
 		    $size = format_file_size($entry['size']);
 			$date = format_date($entry['date']);
-		    
+
 			if ($entry['visible'])
 				$style = '';
 			else
 				$style = ' class="invisible"';
-		    
+
 			if (empty($entry['title']))
 				$link_text = $entry['filename'];
 		    else
@@ -1315,10 +1315,10 @@ else // if method == 'post'
 		    $tool_content .= "\n    <td><input type='radio' name='selectedDocument' value='".$entry['path']."'/></td>";
 		    $tool_content .= "\n    <td width='1%' valign='top' align='center' style='padding-top: 7px;'><img src='$image' border='0' /></td>";
 		    $tool_content .= "\n    <td><div align='left'>$link_text";
-	
+
 			if (!empty($entry['comment']))
 				$tool_content .= "<br /><span class='commentDoc'>" . nl2br(htmlspecialchars($entry['comment'])) . "</span>\n";
-		
+
 			$tool_content .= "</div></td>\n";
 			$tool_content .= "<td><div align='center'>$size</div></td><td><div align='center'>$date</div></td>";
 		}
@@ -1332,7 +1332,7 @@ else // if method == 'post'
 		$tool_content .= "\n</form>";
 		$tool_content .=  "\n</div>";
 	}
-    
+
 	$tool_content .= "</p>
 		<p><u>$langNote</u> :</p>
 		<p>$langScormIntroTextForDummies</p>";

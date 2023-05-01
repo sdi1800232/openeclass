@@ -26,14 +26,17 @@
 
 $require_current_course = TRUE;
 include '../../include/baseTheme.php';
+include '../htmlpurifier/library/HTMLPurifier.auto.php';
+
+$purifier = new HTMLPurifier(HTMLPurifier_Config::createDefault());
 
 ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <head>
-<meta http-equiv="refresh" content="30; url=<?= $_SERVER['PHP_SELF'] ?>" />
+<meta http-equiv="refresh" content="30; url=<?= $purifier->purify($_SERVER['PHP_SELF']) ?>" />
 <title>Chat messages</title>
 <style type="text/css">
 span { color: #727266; }
-div { font-size: 90%; } 
+div { font-size: 90%; }
 body { font-family: Verdana, Arial, Helvetica, sans-serif; }
 </style>
 </head>
@@ -72,6 +75,17 @@ if (!file_exists($fileChatName)) {
 
 // reset command
 if (isset($_GET['reset']) && $is_adminOfCourse) {
+
+	if (empty($_GET['token'])) {
+		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+						exit(); 
+	}
+		
+		if ($_SESSION['token'] !== $_GET['token']) {
+		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+						exit(); 
+	}
+	unset($_SESSION['token']);
 	$fchat = fopen($fileChatName,'w');
 	fwrite($fchat, $timeNow." ---- ".$langWashFrom." ---- ".$nick." --------\n");
 	fclose($fchat);
@@ -80,6 +94,18 @@ if (isset($_GET['reset']) && $is_adminOfCourse) {
 
 // store
 if (isset($_GET['store']) && $is_adminOfCourse) {
+
+	if (empty($_GET['token'])) {
+		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+						exit(); 
+	}
+		
+		if ($_SESSION['token'] !== $_GET['token']) {
+		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+						exit(); 
+	}
+	unset($_SESSION['token']);
+
 	$saveIn = "chat.".date("Y-m-j-B").".txt";
 	$chat_filename = date("YmdGis").randomkeys("8").".txt";
 
@@ -97,6 +123,16 @@ if (isset($_GET['store']) && $is_adminOfCourse) {
 
 // add new line
 if (isset($chatLine) and trim($chatLine) != '') {
+    if (empty($_GET['token'])) {
+		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+						exit(); 
+	}
+		
+		if ($_SESSION['token'] !== $_GET['token']) {
+		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+						exit(); 
+	}
+	unset($_SESSION['token']);
 	$fchat = fopen($fileChatName,'a');
 	$chatLine = mathfilter($chatLine, 12, '../../courses/mathimg/');
 	fwrite($fchat,$timeNow.' - '.$nick.' : '.stripslashes($chatLine)."\n");
@@ -113,11 +149,11 @@ $tmp = array_splice($fileContent, 0 , $lineToRemove);
 $fileReverse = array_reverse($fileContent);
 
 foreach ($fileReverse as $thisLine) {
-	$newline = preg_replace('/ : /', '</span> : ', $thisLine);
-	if (strpos($newline, '</span>') === false) {
-		$newline .= '</span>';
-	}
- 	echo '<div><span>', $newline, "</div>\n";
+    $newline = preg_replace('/ : /', '</span> : ', $purifier->purify($thisLine));
+    if (strpos($newline, '</span>') === false) {
+        $newline .= '</span>';
+    }
+     echo '<div><span>', $newline, "</div>\n";
 }
 
 echo "</body></html>\n";

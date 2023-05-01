@@ -351,7 +351,7 @@ else
 		.$langGlobalProgress
 		.disp_progress_bar($lpProgress, 1)
 		."&nbsp;".$lpProgress."%"
-		.'</small>'."\n"; 
+		.'</small>'."\n";
 }
       echo'</div></td>'
     .'</tr>'

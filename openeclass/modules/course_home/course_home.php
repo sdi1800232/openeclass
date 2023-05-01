@@ -105,8 +105,18 @@ list($maxorder) = mysql_fetch_row($result);
 // other actions in course unit
 if ($is_adminOfCourse) {
         if (isset($_REQUEST['edit_submit'])) {
-                $title = autoquote($_REQUEST['unittitle']);
-                $descr = autoquote($_REQUEST['unitdescr']);
+                if (empty($_GET['token'])) {
+                        header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+                                        exit(); 
+                    }
+                        
+                        if ($_SESSION['token'] !== $_GET['token']) {
+                        header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+                                        exit(); 
+                    }
+                    unset($_SESSION['token']);
+                $title = autoquote(htmlspecialchars($_REQUEST['unittitle']));
+                $descr = autoquote(htmlspecialchars($_REQUEST['unitdescr']));
                 if (isset($_REQUEST['unit_id'])) { // update course unit
                         $unit_id = intval($_REQUEST['unit_id']);
                         $result = db_query("UPDATE course_units SET
@@ -190,21 +200,21 @@ while ($cu = mysql_fetch_array($sql)) {
                         $cunits_content .= "\n        <td width='2%' style=\"border-bottom: 1px solid #CAC3B5;\">".
                                 "<a href='../../modules/units/info.php?edit=$cu[id]'>" .
                                 "<img src='../../template/classic/img/edit.gif' title='$langEdit' /></a></td>" .
-                                "\n        <td width='2%' style=\"border-bottom: 1px solid #CAC3B5;\"><a href='$_SERVER[PHP_SELF]?del=$cu[id]' " .
+                                "\n        <td width='2%' style=\"border-bottom: 1px solid #CAC3B5;\"><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?del=$cu[id]'" .
                                 "onClick=\"return confirmation();\">" .
                                 "<img src='../../template/classic/img/delete.gif' " .
                                 "title='$langDelete'></img></a></td>" .
-                                "\n        <td width='2%' style=\"border-bottom: 1px solid #CAC3B5;\"><a href='$_SERVER[PHP_SELF]?vis=$cu[id]'>" .
+                                "\n        <td width='2%' style=\"border-bottom: 1px solid #CAC3B5;\"><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?vis=$cu[id]'>" .
                                 "<img src='../../template/classic/img/$icon_vis' " .
                                 "title='$langVisibility'></img></a></td>";
                         if ($cu['id'] != $last_id) {
-                                $cunits_content .= "\n        <td width='2%' style=\"border-bottom: 1px solid #CAC3B5;\"><a href='$_SERVER[PHP_SELF]?down=$cu[id]'>" .
+                                $cunits_content .= "\n        <td width='2%' style=\"border-bottom: 1px solid #CAC3B5;\"><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?down=$cu[id]'>" .
                                 "<img src='../../template/classic/img/down.gif' title='$langDown'></img></a></td>";
                         } else {
                                 $cunits_content .= "\n        <td width='2%' style=\"border-bottom: 1px solid #CAC3B5;\">&nbsp;&nbsp;&nbsp;&nbsp;</td>";
                         }
                         if (!$first) {
-                                $cunits_content .= "\n        <td width='2%' style=\"border-bottom: 1px solid #CAC3B5;\"><a href='$_SERVER[PHP_SELF]?up=$cu[id]'><img src='../../template/classic/img/up.gif' title='$langUp'></img></a></td>";
+                                $cunits_content .= "\n        <td width='2%' style=\"border-bottom: 1px solid #CAC3B5;\"><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?up=$cu[id]'><img src='../../template/classic/img/up.gif' title='$langUp'></img></a></td>";
                         } else {
                                 $cunits_content .= "\n        <td width='2%' style=\"border-bottom: 1px solid #CAC3B5;\">&nbsp;&nbsp;&nbsp;&nbsp;</td>";
                         }

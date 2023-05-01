@@ -100,7 +100,7 @@ if ($is_adminOfCourse) {
         } elseif (isset($_GET['delete'])) {
                 $del_id = intval($_GET['numBloc']);
 		$res = db_query("DELETE FROM course_description WHERE id = $del_id");
-		$tool_content .= "<p class='success'>$langBlockDeleted<br /><br /><a href='$_SERVER[PHP_SELF]'>$langBack</a></p>";
+		$tool_content .= "<p class='success'>$langBlockDeleted<br /><br /><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."'>$langBack</a></p>";
 
         } elseif (isset($_REQUEST['numBloc'])) {
                 // Edit action
@@ -121,7 +121,7 @@ if ($is_adminOfCourse) {
                         }
                 }
 
-                $tool_content .= "<form method='post' action='$_SERVER[PHP_SELF]'>
+                $tool_content .= "<form method='post' action='". htmlspecialchars($_SERVER[PHP_SELF]) ."'>
                         <input type='hidden' name='edIdBloc' value='$numBloc' />
                         <table width='99%' class='FormData' align='left'><tbody>
                            <tr><th class='left' width='220'>$langTitle:</th>
@@ -137,7 +137,7 @@ if ($is_adminOfCourse) {
                 $tool_content .= "
                         <tr><th class='left'>&nbsp;</th>
                             <td><table class='xinha_editor'>
-                            <tr><td><textarea id='xinha' name='edContentBloc'>" . 
+                            <tr><td><textarea id='xinha' name='edContentBloc'>" .
                                 q(@$contentBloc) . "</textarea></td></tr></table></td></tr>
                         <tr><th class='left'>&nbsp;</th>
                             <td><input type='submit' name='save' value='$langAdd' />&nbsp;&nbsp;
@@ -152,7 +152,7 @@ if ($is_adminOfCourse) {
                         $contentBloc[$bloc["id"]] = $bloc["content"];
                 }
                 $tool_content .= "
-    <form method='post' action='$_SERVER[PHP_SELF]'>
+    <form method='post' action='". htmlspecialchars($_SERVER[PHP_SELF]) ."'>
 
     <table width='99%' align='left' class='FormData'>
     <tbody>
@@ -182,9 +182,9 @@ if ($is_adminOfCourse) {
         				<thead><tr>
           				<th class='left' style='border: 1px solid #CAC3B5;'>".$titreBloc[$numBloc].":</th>
           				<td width='50' class='right'>
-					<a href='".$_SERVER['PHP_SELF']."?numBloc=".$numBloc."' >
+					<a href='".htmlspecialchars($_SERVER['PHP_SELF'])."?numBloc=".$numBloc."' >
 					<img src='../../template/classic/img/edit.gif' border='0' title='$langModify' /></a>&nbsp;&nbsp;";
-					$tool_content .= "<a href='$_SERVER[PHP_SELF]?delete=yes&amp;numBloc=$numBloc' onClick='return confirmation();'><img src='../../images/delete.gif' border='0' title='$langDelete' /></a>&nbsp;</td></tr></thead></table>
+					$tool_content .= "<a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?delete=yes&amp;numBloc=$numBloc' onClick='return confirmation();'><img src='../../images/delete.gif' border='0' title='$langDelete' /></a>&nbsp;</td></tr></thead></table>
       					</td></tr><tr>
       				<td>".mathfilter(make_clickable(nl2br($contentBloc[$numBloc])), 12, "../../courses/mathimg/")."</td>
     				</tr></thead></table>";

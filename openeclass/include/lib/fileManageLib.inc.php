@@ -1,25 +1,25 @@
 <?php
 
 /*=============================================================================
-       	GUnet eClass 2.0 
-        E-learning and Course Management Program  
+       	GUnet eClass 2.0
+        E-learning and Course Management Program
 ================================================================================
        	Copyright(c) 2003-2010  Greek Universities Network - GUnet
         A full copyright notice can be read in "/info/copyright.txt".
-        
-       	Authors:    Costas Tsibanis <k.tsibanis@noc.uoa.gr>
-                     Yannis Exidaridis <jexi@noc.uoa.gr> 
-                     Alexandros Diamantidis <adia@noc.uoa.gr> 
 
-        For a full list of contributors, see "credits.txt".  
-     
-        This program is a free software under the terms of the GNU 
-        (General Public License) as published by the Free Software 
-        Foundation. See the GNU License for more details. 
+       	Authors:    Costas Tsibanis <k.tsibanis@noc.uoa.gr>
+                     Yannis Exidaridis <jexi@noc.uoa.gr>
+                     Alexandros Diamantidis <adia@noc.uoa.gr>
+
+        For a full list of contributors, see "credits.txt".
+
+        This program is a free software under the terms of the GNU
+        (General Public License) as published by the Free Software
+        Foundation. See the GNU License for more details.
         The full license can be read in "license.txt".
-     
-       	Contact address: GUnet Asynchronous Teleteaching Group, 
-        Network Operations Center, University of Athens, 
+
+       	Contact address: GUnet Asynchronous Teleteaching Group,
+        Network Operations Center, University of Athens,
         Panepistimiopolis Ilissia, 15784, Athens, Greece
         eMail: eclassadmin@gunet.gr
 ==============================================================================*/
@@ -28,18 +28,18 @@
 	fileManageLib.inc.php
 	@last update: 30-06-2006 by Thanos Kyritsis
 	@authors list: Thanos Kyritsis <atkyritsis@upnet.gr>
-	               
+
 	based on Claroline version 1.3 licensed under GPL
 	     and Claroline version 1.7 licensed under GPL
 	      copyright (c) 2001, 2006 Universite catholique de Louvain (UCL)
-	      
+
 	      original file: fileManageLib.inc.php Revision: 1.3
      extra porting from: fileManage.lib.php Revision 1.49.2.3
-	      
+
 	Claroline authors: Thomas Depraetere <depraetere@ipm.ucl.ac.be>
                       Hugues Peeters    <peeters@ipm.ucl.ac.be>
                       Christophe Gesche <gesche@ipm.ucl.ac.be>
-==============================================================================        
+==============================================================================
 */
 
 /*
@@ -56,8 +56,8 @@
 function update_db_info($dbTable, $action, $oldPath, $newPath = "")
 {
 	if ($action == "delete") {
-		mysql_query("DELETE FROM ".$dbTable." 
-			WHERE path LIKE \"".$oldPath."%\""); 
+		mysql_query("DELETE FROM ".$dbTable."
+			WHERE path LIKE \"".$oldPath."%\"");
 	} elseif ($action = "update") {
 		mysql_query("UPDATE $dbTable SET path = CONCAT('$newPath', SUBSTRING(path, LENGTH('$oldPath')+1))
 			WHERE path LIKE '$oldPath%'");
@@ -81,11 +81,11 @@ function check_name_exist($filePath)
 
 
 /*
- * Delete a file or a directory 
+ * Delete a file or a directory
  *
  * @author - Hugues Peeters
  * @param  - $file (String) - the path of file or directory to delete
- * @return - bolean - true if the delete succeed 
+ * @return - bolean - true if the delete succeed
  *           bolean - false otherwise.
  * @see    - delete() uses check_name_exist() and removeDir() functions
  */
@@ -110,7 +110,7 @@ function my_delete($file)
 	{
 		return false; // no file or directory to delete
 	}
-	
+
 }
 
 
@@ -167,7 +167,7 @@ function removeDir($dirPath)
 
 /*
  * Rename a file or a directory
- * 
+ *
  * @author - Hugues Peeters <peeters@ipm.ucl.ac.be>
  * @param  - $filePath (string) - complete path of the file or the directory
  * @param  - $newFileName (string) - new name for the file or the directory
@@ -194,7 +194,7 @@ function my_rename($filePath, $newFileName)
 		{
 			$newFileName .= '.' . $extension[1];
 		}
-		
+
 		/*** Prevent file name with php extension ***/
 		$newFileName = php2phps($newFileName);
 		$newFileName = replace_dangerous_char($newFileName);
@@ -211,7 +211,7 @@ function my_rename($filePath, $newFileName)
  * @author - Hugues Peeters <peeters@ipm.ucl.ac.be>
  * @param  - $source (String) - the path of file or directory to move
  * @param  - $target (String) - the path of the new area
- * @return - bolean - true if the move succeed 
+ * @return - bolean - true if the move succeed
  *           bolean - false otherwise.
  * @see    - move() uses check_name_exist() and copyDirTo() functions
  */
@@ -223,11 +223,11 @@ function move($source, $target)
 		$fileName = my_basename($source);
 		if (check_name_exist($target."/".$fileName))
 		{
-			return false; 
+			return false;
 		}
 		else
 		{	/*** File case ***/
-			if (is_file($source)) 
+			if (is_file($source))
 			{
 				copy($source , $target."/".$fileName);
 				unlink($source);
@@ -253,7 +253,7 @@ function move($source, $target)
 	{
 		return false;
 	}
-	
+
 }
 
 
@@ -356,7 +356,7 @@ function copyDirTo($origDirPath, $destination)
 /*
  * Indexes all the directories and subdirectories
  * contented in a given directory
- * 
+ *
  * @author - Hugues Peeters <peeters@ipm.ucl.ac.be>
  * @param  - path (string) - directory path of the one to index
  * @return - an array containing the path of all the subdirectories
@@ -437,7 +437,7 @@ function form_dir_list_exclude($dbTable, $sourceType, $sourceComponent, $command
                 $groupset = '';
         }
 	$dirList = index_and_sort_dir($baseWorkDir);
-	$dialogBox .= "<form action='$_SERVER[PHP_SELF]$groupset' method='post'>\n";
+	$dialogBox .= "<form action='". htmlspecialchars($_SERVER[PHP_SELF]) ."$groupset' method='post'>\n";
 	$dialogBox .= "<input type='hidden' name='".$sourceType."' value='".$sourceComponent."'>\n";
 	$dialogBox .="<table class='FormData' width='99%'>
         	<tbody><tr><th class='left' width='200'>$langMove:</th>
@@ -445,7 +445,7 @@ function form_dir_list_exclude($dbTable, $sourceType, $sourceComponent, $command
 	$dialogBox .= "<select name='".$command."' class='auth_input'>\n" ;
 	$dialogBox .= "<option value='' style='color:#999999'>".$langParentDir."\n";
 	$bwdLen = strlen($baseWorkDir) ;
-	
+
 	/* build html form inputs */
 	if ($dirList)
 	{
@@ -453,18 +453,18 @@ function form_dir_list_exclude($dbTable, $sourceType, $sourceComponent, $command
 		{
 			$pathValue = substr($pathValue , $bwdLen);
 			$dirname = basename($pathValue);
-			$sql = db_query("SELECT path, filename FROM $dbTable 
-				WHERE path LIKE '%/$dirname%'"); 
+			$sql = db_query("SELECT path, filename FROM $dbTable
+				WHERE path LIKE '%/$dirname%'");
 			while ($r = mysql_fetch_array($sql)) {
 				$filename = $r['filename'];
-				$path = $r['path']; 
-				$tab = "";	
+				$path = $r['path'];
+				$tab = "";
 				$depth = substr_count($pathValue, "/");
 				for ($h=0; $h<$depth; $h++)
 				{
 					$tab .= "&nbsp;&nbsp;";
 				}
-			
+
 //			$tool_content .= $baseWorkDir.$path;
 			if ($pathValue != $entryToExclude and (!is_file($baseWorkDir.$path)))
 				$dialogBox .= "<option value='$path'>$tab>$filename</option>";
@@ -656,7 +656,7 @@ function claro_mkdir($pathName, $mode = 0777, $recursive = false)
         {
             $dirTrail .= empty($dirTrail) ? $thisDir : '/'.$thisDir;
 
-            if ( file_exists($dirTrail) ) 
+            if ( file_exists($dirTrail) )
             {
                 if ( is_dir($dirTrail) ) continue;
                 else                     return false;

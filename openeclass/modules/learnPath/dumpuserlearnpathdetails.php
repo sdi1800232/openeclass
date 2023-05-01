@@ -41,10 +41,10 @@ if($is_adminOfCourse) {
 
 	header("Content-Type: text/csv; charset=$charset");
 	header("Content-Disposition: attachment; filename=userslearningpathstats.csv");
-	
+
 	echo join(';', array_map("csv_escape", array($langStudent, $langAm, $langGroup, $langProgress))),
 	     $crlf;
-	
+
 	// display a list of user and their respective progress
 	$sql = "SELECT U.`nom`, U.`prenom`, U.`user_id`
 		FROM `user` AS U, `cours_user` AS CU
@@ -60,7 +60,7 @@ if($is_adminOfCourse) {
 		$learningPathList = db_query_fetch_all($sql);
 		$iterator = 1;
 		$globalprog = 0;
-		
+
 		foreach($learningPathList as $learningPath)
 		{
 			// % progress

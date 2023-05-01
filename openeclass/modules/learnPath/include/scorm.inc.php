@@ -28,20 +28,20 @@
 	scorm.inc.php
 	@last update: 30-06-2006 by Thanos Kyritsis
 	@authors list: Thanos Kyritsis <atkyritsis@upnet.gr>
-	               
+
 	based on Claroline version 1.7 licensed under GPL
 	      copyright (c) 2001, 2006 Universite catholique de Louvain (UCL)
-	      
+
 	      original file: scorm.inc.php Revision: 1.12.2.3
-	      
+
 	Claroline authors: Piraux Sebastien <pir@cerdecam.be>
                       Lederer Guillaume <led@cerdecam.be>
-==============================================================================        
+==============================================================================
     @Description:
 
     @Comments:
- 
-    @todo: 
+
+    @todo:
 ==============================================================================
 */
 
@@ -79,7 +79,7 @@ if( isset($learningPath_module[0]['lock'])
 	&& isset($learningPath_module[0]['raw_to_pass']) ) // this module blocks the user if he doesn't complete
 {
 	$tool_content .= "\n\n" . '<hr noshade="noshade" size="1" />' . "\n"
-	.    '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '">' . "\n"
+	.    '<form method="POST" action="' . htmlspecialchars($_SERVER['PHP_SELF']) . '">' . "\n"
 	.    '<label for="newRaw">' . $langChangeRaw . '</label>'."\n"
 	.    '<input type="text" value="' . htmlspecialchars($learningPath_module[0]['raw_to_pass']) . '" name="newRaw" id="newRaw" size="3" maxlength="3" /> % ' . "\n"
 	.    '<input type="submit" value="' . $langOk . '" />'."\n"

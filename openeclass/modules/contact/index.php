@@ -51,6 +51,17 @@ if (empty($userdata['email'])) {
 		$tool_content .= "<p>$langEmptyMessage</p>";
 		$tool_content .= form();
 	} else {
+		if (empty($_GET['token'])) {
+			header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+							exit(); 
+		}
+			
+			if ($_SESSION['token'] !== $_GET['token']) {
+			header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+							exit(); 
+		}
+		unset($_SESSION['token']);
+
 		$tool_content .= email_profs($cours_id, $content,
 			"$userdata[prenom] $userdata[nom]",
 			$userdata['email']);
@@ -66,7 +77,7 @@ draw($tool_content, 2, 'admin');
 function form()
 {
   $ret = "
-  <form method='post' action='$_SERVER[PHP_SELF]'>
+  <form method='post' action='". htmlspecialchars($_SERVER[PHP_SELF]) ."'>
 
   <table class=\"FormData\" width=\"99%\" align=\"left\">
   <tbody>

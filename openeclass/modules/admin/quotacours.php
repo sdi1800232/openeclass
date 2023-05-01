@@ -79,6 +79,16 @@ if (isset($search) && ($search=="yes")) {
 }
 // Update course quota
 if (isset($submit))  {
+  if (empty($_GET['token'])) {
+    header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+                    exit(); 
+}
+    
+    if ($_SESSION['token'] !== $_GET['token']) {
+    header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+                    exit(); 
+}
+unset($_SESSION['token']);
 	$dq = $dq * 1000000;
         $vq = $vq * 1000000;
         $gq = $gq * 1000000;
@@ -107,7 +117,7 @@ else {
 	$drq = $q['dropbox_quota'] / 1000000;
 	// Constract the edit form
 	$tool_content .= "
-<form action=".$_SERVER['PHP_SELF']."?c=".htmlspecialchars($_GET['c'])."".$searchurl." method=\"post\">
+<form action=".htmlspecialchars($_SERVER['PHP_SELF'])."?c=".htmlspecialchars($_GET['c'])."".$searchurl." method=\"post\">
   <table class=\"FormData\" width=\"99%\" align=\"left\">
   <tbody>
   <tr>

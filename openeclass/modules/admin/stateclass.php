@@ -66,27 +66,27 @@ $tool_content .= "<table class='FormData' width='99%' align='left'>
 	<tbody>
 	<tr><td colspan='2'>&nbsp;</td></tr>
 	<tr><th width='220'>&nbsp;</th>
-	<td><a href='$_SERVER[PHP_SELF]?stats=login'>$langNbLogin</a></td>
+	<td><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?stats=login'>$langNbLogin</a></td>
 	</tr>
 	<tr><th>&nbsp;</th>
-	<td><a href='$_SERVER[PHP_SELF]?stats=users'>$langUsers</a></td>
+	<td><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?stats=users'>$langUsers</a></td>
 	</tr>
 	<tr><th>&nbsp;</th>
-	<td><a href='$_SERVER[PHP_SELF]?stats=percourse'>$langUsersPerCourse</a></td>
+	<td><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?stats=percourse'>$langUsersPerCourse</a></td>
 	</tr>
 	<tr>
 	<th>&nbsp;</th>
-	<td><a href='$_SERVER[PHP_SELF]?stats=cours'>$langStatCour</a></td>
+	<td><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?stats=cours'>$langStatCour</a></td>
 	</tr>
 	<tr><th>&nbsp;</th>
 	<td>
-	<a href='$_SERVER[PHP_SELF]?stats=musers'>$langMultipleUsers</a></td>
+	<a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?stats=musers'>$langMultipleUsers</a></td>
 	</tr>
 	<tr><th>&nbsp;</th>
-	<td><a href='$_SERVER[PHP_SELF]?stats=memail'>$langMultipleAddr e-mail</a></td>
+	<td><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?stats=memail'>$langMultipleAddr e-mail</a></td>
 	</tr>
 	<tr><th>&nbsp;</th>
-	<td><a href='$_SERVER[PHP_SELF]?stats=mlogins'>$langMultiplePairs LOGIN - PASS</a></td>
+	<td><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?stats=mlogins'>$langMultiplePairs LOGIN - PASS</a></td>
 	</tr>
 	</tbody></table>";
 
@@ -103,10 +103,10 @@ if (isset($stats)) {
 				$course_codes[] = $row['code'];
 			}
 			mysql_free_result($result);
-	
+
 			$first_date_time = time();
 			$totalHits = 0;
-		
+
 			foreach ($course_codes as $course_code) {
 				$sql = "SELECT COUNT(*) AS cnt FROM actions";
 				$result = db_query($sql, $course_code);
@@ -114,7 +114,7 @@ if (isset($stats)) {
 					$totalHits += $row['cnt'];
 				}
 				mysql_free_result($result);
-				
+
 				$sql = "SELECT UNIX_TIMESTAMP(MIN(date_time)) AS first FROM actions";
 				$result = db_query($sql, $course_code);
 				while ($row = mysql_fetch_assoc($result)) {
@@ -128,7 +128,7 @@ if (isset($stats)) {
 				mysql_free_result($result);
 			}
 			$uptime = date("d-m-Y", $first_date_time);
-	
+
 			$tool_content .= "<table width='99%' align='center'>
 			<thead><tr>
 			<td width='49%'>
@@ -138,22 +138,22 @@ if (isset($stats)) {
 			</tr>
 			<tr>
 			<td>$langFrom ".list_1Result("SELECT loginout.when FROM loginout ORDER BY loginout.when LIMIT 1")."</td>
-			<td class='right' width='25%'><b>".list_1Result("SELECT count(*) FROM loginout 
+			<td class='right' width='25%'><b>".list_1Result("SELECT count(*) FROM loginout
 				WHERE loginout.action ='LOGIN'")."</b></td>
 			</tr>
 			<tr>
 			<td>$langLast30Days</td>
-			<td class='right'><b>".list_1Result("SELECT count(*) FROM loginout 
+			<td class='right'><b>".list_1Result("SELECT count(*) FROM loginout
 				WHERE action ='LOGIN' AND (loginout.when > DATE_SUB(CURDATE(),INTERVAL 30 DAY))")."</b></td>
 			</tr>
 			<tr>
 			<td>$langLast7Days</td>
-			<td class='right'><b>".list_1Result("SELECT count(*) FROM loginout 
+			<td class='right'><b>".list_1Result("SELECT count(*) FROM loginout
 				WHERE action ='LOGIN' AND (loginout.when > DATE_SUB(CURDATE(),INTERVAL 7 DAY))")."</b></td>
 			</tr>
 			<tr>
 			<td>$langToday</td>
-			<td class='right'><b>".list_1Result("SELECT count(*) FROM loginout 
+			<td class='right'><b>".list_1Result("SELECT count(*) FROM loginout
 				WHERE action ='LOGIN' AND (loginout.when > curdate())")."</b></td>
 			</tr>
 			<tr>
@@ -206,19 +206,19 @@ if (isset($stats)) {
 			</tr>
 			<tr>
 			<th class='left' colspan='2'><b>$langNunEachAccess</b></th>
-			</tr>".tablize(list_ManyResult("SELECT DISTINCT visible, count(*) 
+			</tr>".tablize(list_ManyResult("SELECT DISTINCT visible, count(*)
 				FROM cours GROUP BY visible "))."
 			<tr>
 			<th class='left' colspan='2'><b>$langNumEachCourse</b></th>
-			</tr>".tablize(list_ManyResult("SELECT DISTINCT faculte, count(*) 
+			</tr>".tablize(list_ManyResult("SELECT DISTINCT faculte, count(*)
 				FROM cours GROUP BY faculte"))."
 			<tr>
 			<th class='left' colspan='2'><b>$langNumEachLang</b></th>
-			</tr>".tablize(list_ManyResult("SELECT DISTINCT languageCourse, count(*) FROM cours 
+			</tr>".tablize(list_ManyResult("SELECT DISTINCT languageCourse, count(*) FROM cours
 					GROUP BY languageCourse DESC"))."
 			<tr>
 			<th class='left' colspan='2'><b>$langNumEachCat</b></th></tr>
-			<tr>".tablize(list_ManyResult("SELECT DISTINCT type, count(*) FROM cours 
+			<tr>".tablize(list_ManyResult("SELECT DISTINCT type, count(*) FROM cours
 					GROUP BY type"))."
 			<tr>
 			<th class='left' colspan='2'><b>$langAnnouncements</b></th>
@@ -271,7 +271,7 @@ if (isset($stats)) {
 			$tool_content .= "</tr>".tablize($cu)."</table></td></tr></table>";
 		break;
 		case 'memail':
-			$sqlLoginDouble = "SELECT DISTINCT email, COUNT(*) AS nb FROM user GROUP BY email 
+			$sqlLoginDouble = "SELECT DISTINCT email, COUNT(*) AS nb FROM user GROUP BY email
 				HAVING nb > 1 ORDER BY nb DESC";
 			$loginDouble = list_ManyResult($sqlLoginDouble);
 			$tool_content .= "<table width='99%' align='center'><thead><tr>
@@ -327,7 +327,7 @@ $tool_content .= "<div class='right'><a href='index.php' class=mainpage>$langBac
 
 function tablize($table) {
 
-	global $langClosed, $langTypesRegistration, $langOpen, $langPre, $langPost, $langOther, 
+	global $langClosed, $langTypesRegistration, $langOpen, $langPre, $langPost, $langOther,
 			$langEnglish, $langGreek, $langSpanish;
 
 	$ret = "";

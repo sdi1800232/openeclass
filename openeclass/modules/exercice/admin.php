@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*========================================================================
 *   Open eClass 2.3
 *   E-learning and Course Management System
@@ -61,11 +61,11 @@ $local_head .= "
 <script language=\"JavaScript\">
 function validate() {
 	if (document.forms[0].intitule.value==\"\") {
-   		alert(\"$langAlertTitle\"); 
+   		alert(\"$langAlertTitle\");
    		return false;
  	}
  	if (document.forms[0].titulaires.value==\"\") {
-   		alert(\"$langAlertAdmin\"); 
+   		alert(\"$langAlertAdmin\");
    		return false;
  	}
  	return true;
@@ -118,7 +118,7 @@ if(@(!is_object($objExercise))) {
 		$objExercise->read($exerciseId);
 	}
 	// saves the object into the session
-	$_SESSION['objExercise'] = $objExercise; 
+	$_SESSION['objExercise'] = $objExercise;
 }
 
 // doesn't select the exercise ID if we come from the question pool
@@ -254,7 +254,7 @@ draw($tool_content, 2, 'exercice', $local_head, '');
 // function for displaying jscalendar
 // -----------------------------------------------
 function jscal_html($name, $u_date) {
-	
+
 	global $jscalendar;
 	if (!$u_date) {
 		$u_date = strftime('%Y-%m-%d', strtotime('now -0 day'));
@@ -267,7 +267,7 @@ function jscal_html($name, $u_date) {
        array('style' => 'width: 15em; color: #840; background-color: #fff; border: 1px dotted #000; text-align: center',
                  'name'  => $name,
                  'value' => $u_date));
-	
+
 	return $cal;
 }
 ?>

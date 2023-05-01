@@ -58,6 +58,16 @@ if (isset($_POST['selectCourse']) and is_array($_POST['selectCourse'])) {
 }
 
 if (isset($_POST["submit"])) {
+        if (empty($_GET['token'])) {
+                header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+                                exit(); 
+            }
+                
+                if ($_SESSION['token'] !== $_GET['token']) {
+                header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+                                exit(); 
+            }
+            unset($_SESSION['token']);
         foreach ($changeCourse as $key => $value) {
                 $cid = intval($value);
                 if (!in_array($cid, $selectCourse)) {
@@ -127,7 +137,7 @@ if (isset($_POST["submit"])) {
 					$tool_content .= "\n        <tr class='odd'>";
 				}
 				$tool_content .= "\n<td>&nbsp;<img src='../../images/arrow_blue.gif' />&nbsp;
-					<a href='$_SERVER[PHP_SELF]?fc=$fac[id]'>" . htmlspecialchars($fac['name']) . "</a> <small><font color='#a33033'>($fac[code])</font></small>";
+					<a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?fc=$fac[id]'>" . htmlspecialchars($fac['name']) . "</a> <small><font color='#a33033'>($fac[code])</font></small>";
 				$n=db_query("SELECT COUNT(*) FROM cours_faculte WHERE facid='$fac[id]'");
 				$r=mysql_fetch_array($n);
 				$tool_content .= "&nbsp;<small><font color=#a5a5a5>($r[0]  ". ($r[0] == 1? $langAvCours: $langAvCourses) . ")</font><small></td></tr>";
@@ -138,11 +148,12 @@ if (isset($_POST["submit"])) {
 		}
 		$tool_content .= "<br /><br />\n";
 	} else {
+                
 		// department exists
 		$numofcourses = getdepnumcourses($fc);
 		// display all the facultes collapsed
 		$tool_content .= collapsed_facultes_horiz($fc);
-		$tool_content .= "\n    <form action='$_SERVER[PHP_SELF]' method='post'>";
+		$tool_content .= "\n    <form action='". htmlspecialchars($_SERVER[PHP_SELF]) ."' method='post'>";
 		if ($numofcourses > 0) {
 			$tool_content .= expanded_faculte($fac, $fc, $uid);
 			$tool_content .= "
@@ -150,8 +161,10 @@ if (isset($_POST["submit"])) {
     <table width='99%' class='framed' align='left'>
     <tbody>
     <tr>
-      <td><input class='Login' type='submit' name='submit' value='$langRegistration' /></td>
-    </tr>
+        <td></td>
+        <td><input class='Login' type='submit' name='submit' value='$langRegistration' /></td>
+
+     </tr>
     </tbody>
     </table>
     </form>";
@@ -405,7 +418,7 @@ function collapsed_facultes_horiz($fc) {
 
 	global $langListFac, $langSelectFac;
 
-	$retString = "\n   <form name='depform' action='$_SERVER[PHP_SELF]' method='get'>\n";
+	$retString = "\n   <form name='depform' action='". htmlspecialchars($_SERVER[PHP_SELF]) ."' method='get'>\n";
 
 	$retString .= "\n  <div id='operations_container'>\n    <ul id='opslist'>";
 	$retString .=  "\n    <li>$langSelectFac:&nbsp;";

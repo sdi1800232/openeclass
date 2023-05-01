@@ -107,14 +107,14 @@ $start_cal = $jscalendar->make_input_field(
 
 if ($is_adminOfCourse) {
 	// change visibility
-	if (isset($mkInvisibl) or isset($mkVisibl)) { 
+	if (isset($mkInvisibl) or isset($mkVisibl)) {
 		if (@$mkInvisibl == true) {
 			$sql = "UPDATE agenda SET visibility = 'i'
-                		WHERE id='".mysql_real_escape_string($id)."'";
-			$p_sql= "DELETE FROM agenda WHERE lesson_code = '$currentCourseID' 
+                		WHERE id='".mysql_real_escape_string(intval($id))."'";
+			$p_sql= "DELETE FROM agenda WHERE lesson_code = '$currentCourseID'
 				AND lesson_event_id ='".mysql_real_escape_string($id)."'";
 		} elseif (@$mkVisibl == true) {
-			$sql = "UPDATE agenda SET visibility = 'v' WHERE id='".mysql_real_escape_string($id)."'";
+			$sql = "UPDATE agenda SET visibility = 'v' WHERE id='".mysql_real_escape_string(intval($id))."'";
 			$p_sql = "SELECT id, titre, contenu, DAY, HOUR, lasting
 				FROM agenda WHERE id='".mysql_real_escape_string($id)."'";
 			$perso_result = db_query($p_sql, $currentCourseID);
@@ -145,7 +145,7 @@ if ($is_adminOfCourse) {
                 	day='".mysql_real_escape_string($date_selection)."',
                 	hour='".mysql_real_escape_string($hour)."',
                 	lasting='".mysql_real_escape_string($lasting)."'
-                	WHERE id='".mysql_real_escape_string($id)."'";
+                	WHERE id='".mysql_real_escape_string(intval($id))."'";
 
 			##[BEGIN personalisation modification]############
 			$perso_sql = "UPDATE $mysqlMainDb.agenda
@@ -154,8 +154,8 @@ if ($is_adminOfCourse) {
                         day = '".mysql_real_escape_string($date_selection)."',
                         hour= '".mysql_real_escape_string($hour)."',
                         lasting='".mysql_real_escape_string($lasting)."'
-                	WHERE lesson_code= '$currentCourseID'
-               		AND lesson_event_id='".mysql_real_escape_string($id)."' ";
+                	WHERE lesson_code= '".mysql_real_escape_string(intval($currentCourseID))."'
+               		AND lesson_event_id='".mysql_real_escape_string(intval($id))."' ";
 			##[END personalisation modification]############
 
 			unset($id);
@@ -164,7 +164,7 @@ if ($is_adminOfCourse) {
 		} else {
 			$sql = "INSERT INTO agenda (id, titre, contenu, day, hour, lasting)
         		VALUES (NULL,'".mysql_real_escape_string(trim($titre))."',
-				'".mysql_real_escape_string(trim($contenu))."', 
+				'".mysql_real_escape_string(trim($contenu))."',
 				'".mysql_real_escape_string($date_selection)."',
 				'".mysql_real_escape_string($hour)."',
 				'".mysql_real_escape_string($lasting)."')";
@@ -173,7 +173,7 @@ if ($is_adminOfCourse) {
 			unset($titre);
 		}
 		$result = db_query($sql, $currentCourseID);
-		
+
 			##[BEGIN personalisation modification]############
 			if (substr_count($sql,"INSERT") == 1) {
 				$perso_sql = "SELECT id, titre, contenu, DAY, HOUR , lasting
@@ -185,7 +185,7 @@ if ($is_adminOfCourse) {
 				$perso_matrix['date_selection'] = $perso_query_result[3];
 				$perso_matrix['hour'] = $perso_query_result[4];
 				$perso_matrix['lasting'] = $perso_query_result[5];
-	
+
 				// Add all data to the main table.
 				$perso_sql = "INSERT INTO $mysqlMainDb.agenda
 				(lesson_event_id, titre, contenu, day, hour, lasting, lesson_code)
@@ -194,9 +194,9 @@ if ($is_adminOfCourse) {
 				'".$perso_query_result[4]."','".$perso_query_result[5]."',
 				'".$currentCourseID."')";
 			}
-	
+
 			db_query($perso_sql, $mysqlMainDb);
-	
+
 			unset($perso_matrix);
 			unset($perso_sql_delete);
 			unset($id);
@@ -235,23 +235,23 @@ function confirmation (name)
 
 	$tool_content .= "\n  <div id='operations_container'>\n    <ul id='opslist'>";
 	if ((!isset($addEvent) && @$addEvent != 1) || isset($_POST['submit'])) {
-		$tool_content .= "\n<li><a href='$_SERVER[PHP_SELF]?addEvent=1'>".$langAddEvent."</a></li>";
+		$tool_content .= "\n<li><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?addEvent=1'>".$langAddEvent."</a></li>";
 	}
 
 	$sens =" ASC";
 	$result = db_query("SELECT id FROM agenda", $currentCourseID);
 	if (mysql_num_rows($result) > 1) {
 		if (isset($_GET["sens"]) && $_GET["sens"]=="d") {
-			$tool_content .=  "\n<li><a href='$_SERVER[PHP_SELF]?sens=' >$langOldToNew</a></li>";
+			$tool_content .=  "\n<li><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?sens=' >$langOldToNew</a></li>";
 			$sens=" DESC ";
 		} else {
-			$tool_content .=  "\n<li><a href='$_SERVER[PHP_SELF]?sens=d' >$langOldToNew</a></li>";
+			$tool_content .=  "\n<li><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?sens=d' >$langOldToNew</a></li>";
 		}
 	}
 	$tool_content .= "\n    </ul>\n  </div>\n";
 }
 	if (isset($id) && $id) {
-		$sql = "SELECT id, titre, contenu, day, hour, lasting FROM agenda WHERE id=$id";
+		$sql = "SELECT id, titre, contenu, day, hour, lasting FROM agenda WHERE id=".mysql_real_escape_string(intval($id))."";
 		$result= db_query($sql, $currentCourseID);
 		$myrow = mysql_fetch_array($result);
 		$id = $myrow["id"];
@@ -276,9 +276,9 @@ function confirmation (name)
 
 	if (isset($_GET['addEvent']) or isset($_GET['edit'])) {
 		$nameTools = $langAddEvent;
-		$navigation[] = array ("url" => $_SERVER['PHP_SELF'], "name" => $langAgenda);
+		$navigation[] = array ("url" => htmlspecialchars($_SERVER['PHP_SELF']), "name" => $langAgenda);
 		$tool_content .= "
-<form method='post' action='$_SERVER[PHP_SELF]' onsubmit='return checkrequired(this, \"titre\");'>
+<form method='post' action='". htmlspecialchars($_SERVER[PHP_SELF]) ."' onsubmit='return checkrequired(this, \"titre\");'>
     <input type='hidden' name='id' value='$id' />
     <table width='99%' class='FormData'>
     <tbody>
@@ -337,10 +337,10 @@ function confirmation (name)
 *-------------------------------------------*/
 if (!isset($sens)) $sens =" ASC";
 
-if ($is_adminOfCourse) { 
+if ($is_adminOfCourse) {
 	$result = db_query("SELECT id, titre, contenu, day, hour, lasting, visibility FROM agenda ORDER BY day ".$sens.", hour ".$sens,$currentCourseID);
 } else {
-	$result = db_query("SELECT id, titre, contenu, day, hour, lasting, visibility FROM agenda WHERE visibility = 'v' 
+	$result = db_query("SELECT id, titre, contenu, day, hour, lasting, visibility FROM agenda WHERE visibility = 'v'
 		ORDER BY day ".$sens.", hour ".$sens,$currentCourseID);
 }
 
@@ -423,15 +423,15 @@ if (mysql_num_rows($result) > 0) {
 	//(evelthon, 12/05/2006)
 	if ($is_adminOfCourse) {
 		$tool_content .=  "\n<td class='right' width='80'>
-		<a href='$_SERVER[PHP_SELF]?id=".$myrow['id']."&amp;edit=true'>
+		<a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?id=".$myrow['id']."&amp;edit=true'>
             	<img src='../../template/classic/img/edit.gif' border='0' title='".$langModify."'></a>&nbsp;
-        	<a href='$_SERVER[PHP_SELF]?id=".$myrow[0]."&amp;delete=yes' onClick='return confirmation('".addslashes($myrow["titre"])."');'>
+        	<a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?id=".$myrow[0]."&amp;delete=yes' onClick='return confirmation('".addslashes($myrow["titre"])."');'>
             	<img src='../../template/classic/img/delete.gif' border='0' title='".$langDelete."'></a>&nbsp;";
 		if ($myrow["visibility"] == 'v') {
-			$tool_content .= "<a href='$_SERVER[PHP_SELF]?id=".$myrow[0]."&amp;mkInvisibl=true'>
+			$tool_content .= "<a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?id=".$myrow[0]."&amp;mkInvisibl=true'>
         	    	<img src='../../template/classic/img/visible.gif' border='0' title='".$langVisible."'></a>";
 		} else {
- 			$tool_content .= "<a href='$_SERVER[PHP_SELF]?id=".$myrow[0]."&amp;mkVisibl=true'>
+ 			$tool_content .= "<a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?id=".$myrow[0]."&amp;mkVisibl=true'>
         	    	<img src='../../template/classic/img/invisible.gif' border='0' title='".$langVisible."'></a>";
 		}
 		$tool_content .= "</td>";

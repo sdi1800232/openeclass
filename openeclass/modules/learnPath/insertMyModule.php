@@ -1,4 +1,5 @@
 <?php
+
 /*========================================================================
 *   Open eClass 2.3
 *   E-learning and Course Management System
@@ -161,7 +162,7 @@ if (isset($_REQUEST['cmdglobal']) && ($_REQUEST['cmdglobal'] == 'add'))
 
 $result = db_query(buildRequestModules());
 
-$tool_content .= '    <form name="addmodule" action="'.$_SERVER['PHP_SELF'].'?cmdglobal=add">'."\n\n";
+$tool_content .= '    <form name="addmodule" action="'.htmlspecialchars($_SERVER['PHP_SELF']).'?cmdglobal=add">'."\n\n";
 $tool_content .= '    <table width="99%" class="LearnPathSum">'."\n"
        .'    <thead>'."\n"
        .'    <tr class="LP_header">'."\n"

@@ -25,10 +25,10 @@
 * =========================================================================*/
 /*
  * Groups Component
- * 
+ *
  * @author Evelthon Prodromou <eprodromou@upnet.gr>
  * @version $Id: group_creation.php,v 1.12 2008-09-03 10:57:41 adia Exp $
- * 
+ *
  * @abstract This module is responsible for the user groups of each lesson
  *
  */
@@ -56,11 +56,11 @@ $tool_content = <<<tCont
       <th width="220">&nbsp;</th>
       <td><b>$langNewGroupCreateData</b></td>
     </tr>
-    <tr> 
+    <tr>
       <th class="left">$langNewGroups :</th>
       <td><input type="text" name="group_quantity" size="3" value="1" class="FormData_InputText"></td>
     </tr>
-    <tr> 
+    <tr>
       <th class="left">$langNewGroupMembers :</th>
       <td><input type="text" name="group_max" size="3" value="8" class="FormData_InputText">&nbsp;<small>$langMax $langPlaces</small></td>
     </tr>

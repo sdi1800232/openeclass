@@ -27,6 +27,13 @@
 $require_login = TRUE;
 include '../../include/baseTheme.php';
 
+include '../htmlpurifier/library/HTMLPurifier.auto.php';
+$config = HTMLPurifier_Config::createDefault();
+$config->set('Core.LexerImpl', 'DirectLex');
+$config->set('HTML.Allowed', 'h1,h2,h3,h4,h5,h6,br,b,i,strong,em,a,pre,code,img,tt,div,ins,del,sup,sub,p,ol,ul,table,thead,tbody,tfoot,blockquote,dl,dt,dd,kbd,q,samp,var,hr,li,tr,td,th,s,strike');
+$config->set('HTML.AllowedAttributes', 'img.src,*.style,*.class, code.class,a.href,*.target');
+$purifier = new HTMLPurifier($config);
+
 $nameTools = $langUnregCours;
 
 $local_style = 'h3 { font-size: 10pt;} li { font-size: 10pt;} ';
@@ -34,7 +41,7 @@ $local_style = 'h3 { font-size: 10pt;} li { font-size: 10pt;} ';
 $tool_content = "";
 
 if (isset($_GET['cid']))
-  $_SESSION['cid_tmp']=$cid;
+  $_SESSION['cid_tmp']=$purifier->purify(mysql_real_escape_string($cid));
 if(!isset($_GET['cid']))
   $cid=$_SESSION['cid_tmp'];
 
@@ -47,8 +54,8 @@ if (!isset($doit) or $doit != "yes") {
       <td class='caution_NoBorder' height='60' colspan='2'>
       	<p>$langConfirmUnregCours:</p><p> <em>".course_code_to_title($cid)."</em>&nbsp;? </p>
 	<ul class='listBullet'>
-	<li>$langYes: 
-	<a href='$_SERVER[PHP_SELF]?u=$uid&amp;cid=$cid&amp;doit=yes' class=mainpage>$langUnregCours</a>
+	<li>$langYes:
+	<a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?u=$uid&amp;cid=$cid&amp;doit=yes&token=$unregToken' class=mainpage>$langUnregCours</a>
 	</li>
 	<li>$langNo: <a href='../../index.php' class=mainpage>$langBack</a>
 	</li></ul>
@@ -58,15 +65,19 @@ if (!isset($doit) or $doit != "yes") {
     </table>";
 
 } else {
-if (isset($uid) and $uid==$_SESSION['uid']) {
-            db_query("DELETE from cours_user WHERE cours_id = (SELECT cours_id FROM cours WHERE code = " . quote($cid) . ") AND user_id='$uid'");
-                if (mysql_affected_rows() > 0) {
-                        $tool_content .= "<p class='success_small'>$langCoursDelSuccess</p>";
-                } else {
-                        $tool_content .= "<p class='caution_small'>$langCoursError</p>";
-                }
-         }
-        $tool_content .= "<br><br><div align=right><a href='../../index.php' class=mainpage>$langBack</a></div>";
+    if (isset($uid) and $uid==$_SESSION['uid']) {
+        $connection = new mysqli($GLOBALS['mysqlServer'], $GLOBALS['mysqlUser'], $GLOBALS['mysqlPassword'], $mysqlMainDb);
+        $statement = $connection->prepare("DELETE from cours_user WHERE cours_id = (SELECT cours_id FROM cours WHERE code = ?) AND user_id= ? ");
+        $statement->bind_param("si", $cid,$uid);
+        $statement->execute();
+        if ($statement->affected_rows > 0) {
+                $tool_content .= "<p class='success_small'>$langCoursDelSuccess</p>";
+        } else {
+                $tool_content .= "<p class='caution_small'>$langCoursError</p>";
+        }
+        $statement->close();
+     }
+    $tool_content .= "<br><br><div align=right><a href='../../index.php' class=mainpage>$langBack</a></div>";
 }
 
 if (isset($_SESSION['uid'])) {

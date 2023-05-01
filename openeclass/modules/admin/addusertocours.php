@@ -50,6 +50,11 @@ if (isset($search) && ($search=="yes")) {
 }
 // Register - Unregister students - professors to course
 if (isset($_POST['submit']))  {
+		if (empty($_POST['token']) || $_SESSION['token'] !== $_POST['token'] ) {
+			header($_SERVER['SERVER_PROTOCOL'] . ' 405 Method Not Allowed');
+			exit(); 
+		}
+		unset($_SESSION['token']);
         $regstuds = isset($_POST['regstuds'])? array_map('intval', $_POST['regstuds']): array();
         $regprofs = isset($_POST['regprofs'])? array_map('intval', $_POST['regprofs']): array();
         $reglist = implode(', ', array_merge($regstuds, $regprofs));
@@ -138,7 +143,7 @@ function reverseAll(cbList) {
 
 </script>';
 
-	$tool_content .= "<form action=".$_SERVER['PHP_SELF']."?c=".htmlspecialchars($_GET['c'])."".$searchurl." method='post'>";
+	$tool_content .= "<form action=".htmlspecialchars($_SERVER['PHP_SELF'])."?c=".htmlspecialchars($_GET['c'])."".$searchurl." method='post'>";
 	$tool_content .= "<table class='FormData' width='99%' align='left'><tbody>
                           <tr><th colspan='3'>".$langFormUserManage."</th></tr>
                           <tr><th align=left>".$langListNotRegisteredUsers."<br />
@@ -146,7 +151,7 @@ function reverseAll(cbList) {
 
 	// Registered users not registered in the selected course
 	$sqll= "SELECT DISTINCT u.user_id , u.nom, u.prenom FROM user u
-		LEFT JOIN cours_user cu ON u.user_id = cu.user_id 
+		LEFT JOIN cours_user cu ON u.user_id = cu.user_id
                      AND cu.cours_id = $cid
 		WHERE cu.user_id IS NULL ORDER BY nom";
 
@@ -213,10 +218,11 @@ function reverseAll(cbList) {
 		$tool_content .= "<option value='$myProf[user_id]'>$myProf[nom] $myProf[prenom]</option>";
 		$a++;
 	}
+	$_SESSION['token'] = bin2hex(openssl_random_pseudo_bytes(32));
 	$tool_content .= "</select></th></tr><tr><td>&nbsp;</td>
 		<td><input type=submit value=\"".$langAcceptChanges."\" name=\"submit\" onClick=\"selectAll(this.form.elements[5],this.form.elements[6],true)\"></td>
 		<td>&nbsp;</td>
-		</tr></tbody></table>";
+		</tr></tbody><input type ='hidden'name='csrf' value = '{$_SESSION['token']}'></table>";
 	$tool_content .= "</form>";
 
 }

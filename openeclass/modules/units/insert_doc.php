@@ -69,7 +69,7 @@ function display_docs()
                                                                    WHERE path = '$path'"));
 			$parentpath = dirname($path);
                         $dirname = "/".htmlspecialchars($dirname);
-                        $parentlink = $_SERVER['PHP_SELF'] . "?type=doc&amp;id=$id&amp;path=" . $parentpath;
+                        $parentlink = htmlspecialchars($_SERVER['PHP_SELF']) . "?type=doc&amp;id=$id&amp;path=" . $parentpath;
                         $parenthtml = "<th class='right'><a href='$parentlink'>$langUp</a> <a href='$parentlink'>" .
                                       "<img src='../../template/classic/img/parent.gif' height='20' width='20' /></a></th>";
                         $colspan = 4;
@@ -102,7 +102,7 @@ function display_docs()
 						$link_text = $entry['title'];
 					}
 				}
-				if ($entry['visible'] == 'i') { 
+				if ($entry['visible'] == 'i') {
 					$vis = 'invisible';
 				} else {
 					if ($counter % 2 == 0) {
@@ -116,7 +116,7 @@ function display_docs()
 					<a href='$file_url'$link_extra><img src='$image' border='0' /></a></td>";
 				$tool_content .= "<td width='60%'><div align='left'>
 					<a href='$file_url'$link_extra>$link_text</a>";
-	
+
 				/*** comments ***/
 				if (!empty($entry['comment'])) {
 					$tool_content .= "<br /><span class='comment'>" .

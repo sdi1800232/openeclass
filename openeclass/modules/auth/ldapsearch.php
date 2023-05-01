@@ -1,4 +1,5 @@
-<? 
+<?
+die();
 /*========================================================================
 *   Open eClass 2.3
 *   E-learning and Course Management System
@@ -27,7 +28,7 @@
 	ldapsearch.php
 	@authors list: Karatzidis Stratos <kstratos@uom.gr>
 		       Vagelis Pitsioygas <vagpits@uom.gr>
-==============================================================================        
+==============================================================================
   @Description: This script/file tries to authenticate the user, using
   his user/pass pair and the authentication method defined by the admin
 ==============================================================================
@@ -63,8 +64,8 @@ if(!empty($is_submit))
 		$tool_content .= "<table width=\"99%\"><tbody><tr>
 		  <td class=\"caution\" height='60'><p>$ldapempty  $errormessage</p></td>
 		</tr></tbody></table>";
-	} 
-	else 
+	}
+	else
 	{
 		// try to authenticate him
 		$auth_method_settings = get_auth_settings($auth);
@@ -94,13 +95,13 @@ if(!empty($is_submit))
 			default:
 				break;
 		}
-		
+
 		$is_valid = auth_user_login($auth,$ldap_email,$ldap_passwd);
 
 		if($is_valid) {  // Successfully connected
 			$tool_content .= "<table width=\"99%\" align='left' class='FormData'><thead>
 			<tr><td>
-			<form action=\"$_SERVER[PHP_SELF]\" method=\"post\">" .
+			<form action=\"". htmlspecialchars($_SERVER[PHP_SELF]) ."\" method=\"post\">" .
 					(isset($GLOBALS['auth_user_info'])?
 			('<input type="hidden" name="prenom_form" value="' . $GLOBALS['auth_user_info']['firstname'] .
 			'" /><input type="hidden" name="nom_form" value="' . $GLOBALS['auth_user_info']['lastname'] .
@@ -175,10 +176,10 @@ if (isset($_POST['submit'])) {
 		if (!empty($email) and !email_seems_valid($email)) {
 			$registration_errors[] = $langEmailWrong;
 		}
-	
+
 		$auth_method_settings = get_auth_settings($auth);
 		$password = $auth_method_settings['auth_name'];
-	
+
 	if (count($registration_errors) == 0) {
 		$emailsubject = "$langYourReg $siteName";
 		$emailbody = "$langDestination $prenom_form $nom_form\n" .
@@ -188,22 +189,22 @@ if (isset($_POST['submit'])) {
 			"$administratorName $administratorSurname" .
 			"$langManager $siteName \n$langTel $telephone \n" .
 			"$langEmail: $emailhelpdesk";
-	
+
 		send_mail('', '', '', $email, $emailsubject, $emailbody, $charset);
 		$registered_at = time();
 		$expires_at = time() + $durationAccount;
 		$authmethods = array("2","3","4","5");
 		$uname = escapeSimple($uname);
 		$lang = langname_to_code($language);
-	
-		$q1 = "INSERT INTO `$mysqlMainDb`.user 
-			SET nom = '$nom_form', prenom = '$prenom_form', 
+
+		$q1 = "INSERT INTO `$mysqlMainDb`.user
+			SET nom = '$nom_form', prenom = '$prenom_form',
 			username = '$uname', password = '$password', email = '$email',
 			statut = '5', department = '$department',
 			am = '$am', registered_at = ".$registered_at.",
 			expires_at = ".$expires_at. ",
 			lang = '$lang'";
-	
+
 		$inscr_user = db_query($q1);
 		$last_id = mysql_insert_id();
 		$result=mysql_query("SELECT user_id, nom, prenom FROM `$mysqlMainDb`.user WHERE user_id='$last_id'");
@@ -212,7 +213,7 @@ if (isset($_POST['submit'])) {
 			$nom=$myrow[1];
 			$prenom=$myrow[2];
 		}
-	
+
 		db_query("INSERT INTO loginout  SET id_user = '$uid',
 			ip = '".$REMOTE_ADDR."', `when` = NOW(), action = 'LOGIN'", $mysqlMainDb);
 		$_SESSION['uid'] = $uid;
@@ -220,7 +221,7 @@ if (isset($_POST['submit'])) {
 		$_SESSION['prenom'] = $prenom;
 		$_SESSION['nom'] = $nom;
 		$_SESSION['uname'] = $uname;
-	
+
 		$tool_content .= "<table width='99%'><tbody><tr>" .
 			"<td class='well-done' height='60'>" .
 			"<p>$langDear $prenom $nom,</p>" .

@@ -1,4 +1,5 @@
 <?php
+
 /*========================================================================
 *   Open eClass 2.3
 *   E-learning and Course Management System
@@ -202,7 +203,7 @@ function showlinks($tbl_link)
 	$numberoflinks=mysql_num_rows($result);
 
 	$output = "";
-	$output .= '<form action="' . $_SERVER['PHP_SELF'] . '" method="POST">';
+	$output .= '<form action="' . htmlspecialchars($_SERVER['PHP_SELF']) . '" method="POST">';
 	$output .= "
     <table width=\"99%\" class=\"LearnPathSum\">
     <thead>

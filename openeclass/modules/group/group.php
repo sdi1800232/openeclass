@@ -255,7 +255,7 @@ if ($is_adminOfCourse) {
 	$tool_content .= "<table class='FormData' align='center' style='border: 1px solid #CAC3B5;'>
 	<tbody>
 	<tr class='odd'>
-	<td colspan='2' class='right'><a href='group_properties.php'>$langPropModify</a> 
+	<td colspan='2' class='right'><a href='group_properties.php'>$langPropModify</a>
 	<img src='../../template/classic/img/edit.gif' align='middle' border='0' title='$langEdit'></td>
 	</tr>
 	<tr>
@@ -263,7 +263,7 @@ if ($is_adminOfCourse) {
 	<td align='right'><b>$langGroupAccess</b></td>
 	</tr>";
 
-	$resultProperties=db_query("SELECT id, self_registration, private, forum, document 
+	$resultProperties=db_query("SELECT id, self_registration, private, forum, document
 			FROM group_properties WHERE id=1", $currentCourse);
 	while ($myProperties = mysql_fetch_array($resultProperties))
 	{
@@ -437,7 +437,7 @@ else {
 			} else {
 				$tool_content .= $group['name'];
 			}
-		}	
+		}
 		$tool_content .= "</div></td>";
 		$tool_content .= "<td width='35%'><div align='center'>".uid_to_name($group['tutor'])."</div></td>";
 		// SELF REGISTRATION
@@ -445,7 +445,7 @@ else {
 		if($selfRegProp == 1)
 		{
 			$tool_content .= "<td><div align='center'>";
-			if((!$uid) OR (isset($myTeam)) OR 
+			if((!$uid) OR (isset($myTeam)) OR
 				(($countRegistered>=$group['maxStudent']) AND ($group['maxStudent']>>0))) {
 				$tool_content .= "-";
 			} else {

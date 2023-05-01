@@ -27,12 +27,13 @@
 include '../../include/baseTheme.php';
 include '../../include/sendMail.inc.php';
 require_once 'auth.inc.php';
+include '../htmlpurifier/library/HTMLPurifier.auto.php';
 $nameTools = $langReqRegProf;
 $navigation[] = array("url"=>"registration.php", "name"=> $langNewUser);
 
 // Initialise $tool_content
 $tool_content = "";
-
+$purifier = new HTMLPurifier(HTMLPurifier_Config::createDefault());
 // security check
 if (isset($_POST['localize'])) {
 	$language = preg_replace('/[^a-z]/', '', $_POST['localize']);
@@ -44,7 +45,7 @@ $auth = get_auth_id();
 if (!isset($submit)) {
 
 @$tool_content .= "
-<form action=\"$_SERVER[PHP_SELF]\" method=\"post\">
+<form action=\"". htmlspecialchars($_SERVER[PHP_SELF]) ."\" method=\"post\">
 <table width=\"99%\" style=\"border: 1px solid #edecdf;\">
 <thead>
 <tr>
@@ -53,23 +54,23 @@ if (!isset($submit)) {
   <thead>
   <tr>
    <th class='left' width='220'>$langSurname</th>
-   <td><input size='35' type='text' name='nom_form' value='$nom_form' class='FormData_InputText'>&nbsp;&nbsp;<small>(*)</small></td>
+   <td><input size='35' type='text' name='nom_form' value='". $purifier->purify($nom_form) ."' class='FormData_InputText'>&nbsp;&nbsp;<small>(*)</small></td>
   </tr>
   <tr>
     <th class='left'>$langName</th>
-    <td><input size='35' type='text' name='prenom_form' value='$prenom_form' class='FormData_InputText'>&nbsp;&nbsp;<small>(*)</small></td>
+    <td><input size='35' type='text' name='prenom_form' value='". $purifier->purify($prenom_form) ."' class='FormData_InputText'>&nbsp;&nbsp;<small>(*)</small></td>
   </tr>
 	<tr>
     <th class='left'>$langPhone</th>
-    <td><input size='35' type='text' name='userphone' value='$userphone' class='FormData_InputText'>&nbsp;&nbsp;<small>(*)</small></td>
+    <td><input size='35' type='text' name='userphone' value='". $purifier->purify($userphone) ."' class='FormData_InputText'>&nbsp;&nbsp;<small>(*)</small></td>
   </tr>
   <tr>
     <th class='left'>$langUsername</th>
-    <td><input size='35' type='text' name='uname' value='$uname' class='FormData_InputText'>&nbsp;&nbsp;<small>(*)</small></td>
+    <td><input size='35' type='text' name='uname' value='". $purifier->purify($uname) ."' class='FormData_InputText'>&nbsp;&nbsp;<small>(*)</small></td>
   </tr>
   <tr>
     <th class='left'>$langEmail</th>
-    <td><input size='35' type='text' name='email_form' value='$email_form' class='FormData_InputText'>&nbsp;&nbsp;<small>(*)</small></td>
+    <td><input size='35' type='text' name='email_form' value='". $purifier->purify($email_form) ."' class='FormData_InputText'>&nbsp;&nbsp;<small>(*)</small></td>
   </tr>
   <tr>
     <th class='left'>$langComments</td>
@@ -141,17 +142,17 @@ $registration_errors = array();
             }
 
             db_query('INSERT INTO prof_request SET
-                                profname = ' . autoquote($prenom_form). ',
-                                profsurname = ' . autoquote($nom_form). ',
-                                profuname = ' . autoquote($uname). ',
-                                profemail = ' . autoquote($email_form). ',
-                                proftmima = ' . autoquote($department). ',
-                                profcomm = ' . autoquote($userphone). ',
+                                profname = ' . autoquote(mysql_real_escape_string($purifier->purify($prenom_form))). ',
+                                profsurname = ' . autoquote(mysql_real_escape_string($purifier->purify($nom_form))). ',
+                                profuname = ' . autoquote(mysql_real_escape_string($purifier->purify($uname))). ',
+                                profemail = ' . autoquote(mysql_real_escape_string($purifier->purify($email_form))). ',
+                                proftmima = ' . autoquote(mysql_real_escape_string($purifier->purify($department))). ',
+                                profcomm = ' . autoquote(mysql_real_escape_string($purifier->purify($userphone))). ',
                                 status = 1,
                                 statut = 1,
                                 date_open = NOW(),
-                                comment = ' . autoquote($usercomment). ',
-                                lang = ' . autoquote($proflang),
+                                comment = ' . autoquote(mysql_real_escape_string($purifier->purify($usercomment))). ',
+                                lang = ' . autoquote(mysql_real_escape_string($purifier->purify($proflang))),
                      $mysqlMainDb);
 
             //----------------------------- Email Message --------------------------
@@ -189,7 +190,7 @@ $registration_errors = array();
                 foreach ($registration_errors as $error) {
                         $tool_content .= "<p>$error</p>";
                 }
-	       $tool_content .= "<p><a href='$_SERVER[PHP_SELF]?prenom_form=$_POST[prenom_form]&amp;nom_form=$_POST[nom_form]&amp;userphone=$_POST[userphone]&amp;uname=$_POST[uname]&amp;email_form=$_POST[email_form]&amp;usercomment=$_POST[usercomment]'>$langAgain</a></p>" .
+	       $tool_content .= "<p><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?prenom_form=$_POST[prenom_form]&amp;nom_form=$_POST[nom_form]&amp;userphone=$_POST[userphone]&amp;uname=$_POST[uname]&amp;email_form=$_POST[email_form]&amp;usercomment=$_POST[usercomment]'>$langAgain</a></p>" .
                 "</td></tr></tbody></table><br /><br />";
 	}
 

@@ -25,9 +25,16 @@
 *  			eMail: info@openeclass.org
 * =========================================================================*/
 // if we come from the home page
+include '../htmlpurifier/library/HTMLPurifier.auto.php';
+$config = HTMLPurifier_Config::createDefault();
+$config->set('Core.LexerImpl', 'DirectLex');
+$config->set('HTML.Allowed', 'h1,h2,h3,h4,h5,h6,br,b,i,strong,em,a,pre,code,img,tt,div,ins,del,sup,sub,p,ol,ul,table,thead,tbody,tfoot,blockquote,dl,dt,dd,kbd,q,samp,var,hr,li,tr,td,th,s,strike');
+$config->set('HTML.AllowedAttributes', 'img.src,*.style,*.class, code.class,a.href,*.target');
+$purifier = new HTMLPurifier($config);
+
 if (isset($from_home) and ($from_home == TRUE) and isset($_GET['cid'])) {
         session_start();
-        $_SESSION['dbname'] = $cid;
+          $_SESSION['dbname'] = $purifier->purify($cid);
 }
 $require_current_course = TRUE;
 $require_prof = true;
@@ -57,9 +64,19 @@ $head_content = <<<hContent
 hContent;
 
 if (isset($_POST['submit'])) {
+  if (empty($_GET['token'])) {
+    header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+                    exit(); 
+}
+    
+    if ($_SESSION['token'] !== $_GET['token']) {
+    header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+                    exit(); 
+}
+unset($_SESSION['token']);
         if (empty($_POST['title'])) {
                 $tool_content .= "<p class='caution_small'>$langNoCourseTitle<br />
-                                  <a href='$_SERVER[PHP_SELF]'>$langAgain</a></p><br />";
+                                  <a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."'>$langAgain</a></p><br />";
         } else {
                 if (isset($_POST['localize'])) {
                         $newlang = $language = langcode_to_name($_POST['localize']);
@@ -87,21 +104,42 @@ if (isset($_POST['submit'])) {
                 }
 
                 list($facid, $facname) = explode('--', $_POST['facu']);
-                db_query("UPDATE `$mysqlMainDb`.cours
-                          SET intitule = " . autoquote($_POST['title']) .",
-                              faculte = " . autoquote($facname) . ",
-                              description = " . autoquote($_POST['description']) . ",
-                              course_addon = " . autoquote($_POST['course_addon']) . ",
-                              course_keywords = ".autoquote($_POST['course_keywords']) . ",
-                              visible = " . intval($_POST['formvisible']) . ",
-                              titulaires = " . autoquote($_POST['titulary']) . ",
-                              languageCourse = '$newlang',
-                              type = " . autoquote($_POST['type']) . ",
-                              password = " . autoquote($_POST['password']) . ",
-                              faculteid = " . intval($facid) . "
-                          WHERE cours_id = $cours_id");
+
+              $connection = new mysqli($GLOBALS['mysqlServer'], $GLOBALS['mysqlUser'], $GLOBALS['mysqlPassword'], $mysqlMainDb);
+      			  
+               $statement = $connection->prepare("UPDATE cours
+                         SET intitule = ?,
+                             faculte = ?,
+                             description = ?,
+                             course_addon = ?,
+                             course_keywords = ?,
+                             visible = ?,
+                             titulaires = ?,
+                             languageCourse = ?,
+                             type = ?,
+                             password = ?,
+                             faculteid = ?
+                         WHERE cours_id = ?");
+                
+                $statement->bind_param("s",
+                        $purifier->purify(($_POST['title'])),
+                        $purifier->purify(($facname)),
+                        $purifier->purify(($_POST['description'])),
+                        $purifier->purify(($_POST['course_addon'])),
+                        $purifier->purify(($_POST['course_keywords'])),
+                        intval($_POST['formvisible']),
+                        $purifier->purify(($_POST['titulary'])),
+                        $newlang,
+                        $purifier->purify(($_POST['type'])),
+                        $purifier->purify(($_POST['password'])),
+                        intval($facid),
+                        $cours_id
+                      ) or die($stmt->error);
+                $statement->execute();
+        				$statement->close();
+        				$connection->close();
                 db_query("UPDATE `$mysqlMainDb`.cours_faculte
-                          SET faculte = " . autoquote($facname) . ",
+                          SET faculte = " . autoquote($purifier->purify(($facname))) . ",
                               facid = " . intval($facid) . "
                           WHERE code='$currentCourseID'");
 
@@ -129,7 +167,7 @@ if (isset($_POST['submit'])) {
                 db_query("UPDATE `$currentCourseID`.accueil SET rubrique='$langCourseUnits' WHERE define_var='MODULE_ID_UNITS'");
 
                 $tool_content .= "<p class='success_small'>$langModifDone<br />
-                        <a href='".$_SERVER['PHP_SELF']."'>$langBack</a></p><br />
+                        <a href='".htmlspecialchars($_SERVER['PHP_SELF'])."'>$langBack</a></p><br />
                         <p><a href='{$urlServer}courses/$currentCourseID/index.php'>$langBackCourse</a></p><br />";
         }
 } else {
@@ -163,7 +201,7 @@ if (isset($_POST['submit'])) {
 		$checkpasssel = empty($password)? '': " checked='1'";
 
 		@$tool_content .="
-		<form method='post' action='$_SERVER[PHP_SELF]'>
+		<form method='post' action='". htmlspecialchars($_SERVER[PHP_SELF]) ."'>
 		<table width='99%' align='left'>
 		<thead><tr>
 		<td>

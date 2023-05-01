@@ -28,6 +28,7 @@
 $require_admin = TRUE;
 include '../../include/baseTheme.php';
 include '../../include/sendMail.inc.php';
+include '../htmlpurifier/library/HTMLPurifier.auto.php';
 
 $nameTools = $langNewUser;
 $navigation[]= array ("url"=>"../admin/", "name"=> $langAdmin);
@@ -39,22 +40,37 @@ $submit = isset($_POST['submit'])?$_POST['submit']:'';
 // register user
 // ----------------------------
 
+$purifier = new HTMLPurifier(HTMLPurifier_Config::createDefault());
+
 if($submit) {
    // register user
-  $nom_form = isset($_POST['nom_form'])?$_POST['nom_form']:'';
-  $prenom_form = isset($_POST['prenom_form'])?$_POST['prenom_form']:'';
-  $uname = isset($_POST['uname'])?$_POST['uname']:'';
-  $password = isset($_POST['password'])?$_POST['password']:'';
-  $email_form = isset($_POST['email_form'])?$_POST['email_form']:'';
-  $department = isset($_POST['department'])?$_POST['department']:'';
-  $localize = isset($_POST['localize'])?$_POST['localize']:'';
-  $lang = langname_to_code($localize);	
+  $nom_form = isset($_POST['nom_form'])?$purifier->purify(mysql_real_escape_string($_POST['nom_form'])):'';
+  $prenom_form = isset($_POST['prenom_form'])?$purifier->purify(mysql_real_escape_string($_POST['prenom_form'])):'';
+  $uname = isset($_POST['uname'])?$purifier->purify(mysql_real_escape_string($_POST['uname'])):'';
+  $password = isset($_POST['password'])?$purifier->purify(mysql_real_escape_string($_POST['password'])):'';
+  $email_form = isset($_POST['email_form'])?$purifier->purify(mysql_real_escape_string($_POST['email_form'])):'';
+  $department = isset($_POST['department'])?intval($purifier->purify(mysql_real_escape_string($_POST['department']))):'';
+  $localize = isset($_POST['localize'])?$purifier->purify(mysql_real_escape_string($_POST['localize'])):'';
+  $lang = langname_to_code($localize);
 
       // check if user name exists
-  $username_check=mysql_query("SELECT username FROM `$mysqlMainDb`.user WHERE username='$uname'");
-  while ($myusername = mysql_fetch_array($username_check)) {
+  $connection = new mysqli($GLOBALS['mysqlServer'], $GLOBALS['mysqlUser'], $GLOBALS['mysqlPassword'], $mysqlMainDb);
+  
+
+  $statement = $conn->prepare("SELECT username FROM `$mysqlMainDb`.user WHERE username= ?");
+  
+  $statement->bind_param("s", $uname);
+  
+  
+  $statement->execute();
+  $r = $statement->get_result();
+
+  while ($myusername = $r->fetch_array()) {
     $user_exist=$myusername[0];
   }
+
+  $statement->close();
+	$connection->close();
 
 // check if there are empty fields
   if (empty($nom_form) or empty($prenom_form) or empty($password)
@@ -103,10 +119,20 @@ send_mail('', '', '', $email_form, $emailsubject, $emailbody, $charset);
     $password_encrypted = md5($password);
     $s = mysql_query("SELECT id FROM faculte WHERE name='$department'");
     $dep = mysql_fetch_array($s);
-    $inscr_user=mysql_query("INSERT INTO `$mysqlMainDb`.user
-      (user_id, nom, prenom, username, password, email, statut, department, registered_at, expires_at, lang)
-      VALUES ('NULL', '$nom_form', '$prenom_form', '$uname', '$password_encrypted', '$email_form', '5', '$dep[id]', '$registered_at', '$expires_at', '$lang')");
 
+    $connection = new mysqli($GLOBALS['mysqlServer'], $GLOBALS['mysqlUser'], $GLOBALS['mysqlPassword'], $mysqlMainDb);
+    
+    $stmt = $conn->prepare("INSERT INTO `$mysqlMainDb`.user (user_id, nom, prenom, username, password, email, statut, department, registered_at, expires_at, lang) VALUES ('NULL', ? , ?, ?, ?, ?,'5',?,?,?,?)");
+
+    $statement->bind_param("s", $purifier->purify( mysql_real_escape_string($nom_form)),$purifier->purify( mysql_real_escape_string($prenom_form)),$purifier->purify( mysql_real_escape_string($uname))
+  									,$password_encrypted,$purifier->purify( mysql_real_escape_string($email_form)), mysql_real_escape_string($dep[id]),$registered_at,$expires_at,$lang);
+  	
+                    $inscr_user = $statement->execute();
+  	$last_id = $stmt->insert_id;
+  	
+    $statement->close();
+  	$connection->close();
+    
     // close request
         $rid = intval($_POST['rid']);
         db_query("UPDATE prof_request set status = '2',
@@ -130,7 +156,7 @@ if (isset($_GET['lang'])) {
 $tool_content .= "<table width=\"99%\"><tbody>
    <tr>
     <td>
-    <form action='$_SERVER[PHP_SELF]' method='post'>
+    <form action='". htmlspecialchars($_SERVER[PHP_SELF]) ."' method='post'>
     <table border=0 cellpadding='1' cellspacing='2' border='0' width='100%' align=center>
 	<thead>
     <tr>
@@ -164,13 +190,13 @@ $tool_content .= "<table width=\"99%\"><tbody>
 	$dep = array();
         $deps=db_query("SELECT name FROM faculte order by id");
 			while ($n = mysql_fetch_array($deps))
-				$dep[$n[0]] = $n['name'];  
+				$dep[$n[0]] = $n['name'];
 
 		if (isset($pt))
 			$tool_content .= selection ($dep, 'department', $pt);
-		else 
+		else
 			$tool_content .= selection ($dep, 'department');
- 
+
 	$tool_content .= "<tr><th class='left'>$langLanguage</th><td>";
 	$tool_content .= lang_select_options('localize');
 	$tool_content .= "</td></tr>";
@@ -179,11 +205,11 @@ $tool_content .= "<table width=\"99%\"><tbody>
 		<tr><td>&nbsp;</td>
 		<td><input type=\"submit\" name=\"submit\" value=\"".$langSubmit."\" ></td>
 		</tr></thead></table>
-		<input type='hidden' name='rid' value='".@$id."'>
+		<input type='hidden' name='rid' value='".@$purifier->purify( mysql_real_escape_string($id))."'>
 		</tbody></table></form>";
     $tool_content .= "<center><p><a href=\"../admin/index.php\">$langBack</p></center>";
 
-} // end of if 
+} // end of if
 
 draw($tool_content,3, 'auth');
 
@@ -201,11 +227,11 @@ function error_screen($message) {
 
 function end_tables() {
 	global $langBack;
-	
+
 	$retstring = "</td></tr><tr><td align=right valign=bottom height='180'>";
 	$retstring .= "<a href='../admin/index.php' class=mainpage>$langBack&nbsp;</a>";
 	$retstring .= "</td></tr></table>";
-	
+
 	return $retstring;
 }
 

@@ -27,7 +27,7 @@
 /*===========================================================================
 	toc.php
 	@last update: 29-08-2009 by Thanos Kyritsis
-	@authors list: Yannis Exidaridis <jexi@noc.uoa.gr> 
+	@authors list: Yannis Exidaridis <jexi@noc.uoa.gr>
 	               Alexandros Diamantidis <adia@noc.uoa.gr>
 	               Thanos Kyritsis <atkyritsis@upnet.gr>
 ==============================================================================
@@ -160,7 +160,7 @@ foreach ($flatElementList as $module)
             $moduleImg = choose_image(basename($module['path']));
 
         $contentType_alt = selectAlt($module['contentType']);
-        
+
 		// eikonidio pou deixnei an perasame h oxi to sygkekrimeno module
 		unset($imagePassed);
 		if($module['credit'] == 'CREDIT' || $module['lesson_status'] == 'COMPLETED' || $module['lesson_status'] == 'PASSED') {
@@ -182,7 +182,7 @@ foreach ($flatElementList as $module)
 		// emphasize currently displayed module or not
 		if ( $_SESSION['lp_module_id'] == $module['module_id'] )
 			echo "<em>".htmlspecialchars($module['name'])."</em>";
-		else        
+		else
 			echo "<a href='navigation/viewModule.php?viewModule_id=$module[module_id]'".$style." target='scoFrame'>". htmlspecialchars($module['name']). "</a>";
 
     }

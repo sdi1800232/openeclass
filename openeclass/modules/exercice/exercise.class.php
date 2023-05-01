@@ -38,7 +38,7 @@ class Exercise
 	var $description;
 	var $type;
 	var $StartDate;
-	var $EndDate;	
+	var $EndDate;
 	var $TimeConstrain;
 	var $AttemptsAllowed;
 	var $random;
@@ -78,8 +78,8 @@ class Exercise
 	{
 		global $TBL_EXERCICES, $TBL_EXERCICE_QUESTION, $TBL_QUESTIONS, $currentCourseID;
 		mysql_select_db($currentCourseID);
-		$sql="SELECT titre, description, type, StartDate, EndDate, TimeConstrain, 
-			AttemptsAllowed, random, active, results, score 
+		$sql="SELECT titre, description, type, StartDate, EndDate, TimeConstrain,
+			AttemptsAllowed, random, active, results, score
 			FROM `$TBL_EXERCICES` WHERE id='$id'";
 		$result=db_query($sql);
 
@@ -99,7 +99,7 @@ class Exercise
 			$this->results=$object->results;
 			$this->score=$object->score;
 
-			$sql="SELECT question_id,q_position FROM `$TBL_EXERCICE_QUESTION`,`$TBL_QUESTIONS` 
+			$sql="SELECT question_id,q_position FROM `$TBL_EXERCICE_QUESTION`,`$TBL_QUESTIONS`
 				WHERE question_id=id AND exercice_id='$id' ORDER BY q_position";
 			$result=db_query($sql);
 
@@ -331,7 +331,7 @@ class Exercise
 	{
 		$this->type=$type;
 	}
-	
+
 	function updateStartDate($StartDate)
 	{
 		$this->StartDate=$StartDate;
@@ -414,7 +414,7 @@ class Exercise
 		if($id)
 		{
 			mysql_select_db($currentCourseID);
-			$sql="UPDATE `$TBL_EXERCICES` 
+			$sql="UPDATE `$TBL_EXERCICES`
 				SET titre='$exercise',description='$description',type='$type',".
 				"StartDate='$StartDate',EndDate='$EndDate',TimeConstrain='$TimeConstrain',".
 				"AttemptsAllowed='$AttemptsAllowed', random='$random',
@@ -448,15 +448,15 @@ class Exercise
 	function moveUp($id)
 	{
 		global $currentCourseID;
-		
-		list($pos) = mysql_fetch_array(db_query("SELECT q_position FROM questions 
+
+		list($pos) = mysql_fetch_array(db_query("SELECT q_position FROM questions
 							WHERE id='$id'", $currentCourseID));
-	
+
 		if ($pos > 1) {
 			$temp = $this->questionList[$pos-1];
 			$this->questionList[$pos-1] = $this->questionList[$pos];
 			$this->questionList[$pos] = $temp;
-		} 
+		}
 		return;
 	}
 
@@ -469,15 +469,15 @@ class Exercise
 	function moveDown($id)
 	{
 		global $currentCourseID;
-		
-		list($pos) = mysql_fetch_array(db_query("SELECT q_position FROM questions 
+
+		list($pos) = mysql_fetch_array(db_query("SELECT q_position FROM questions
 							WHERE id='$id'", $currentCourseID));
-		
+
 		if ($pos < count($this->questionList)) {
 			$temp = $this->questionList[$pos+1];
 			$this->questionList[$pos+1] = $this->questionList[$pos];
 			$this->questionList[$pos] = $temp;
-		} 
+		}
 		return;
 	}
 

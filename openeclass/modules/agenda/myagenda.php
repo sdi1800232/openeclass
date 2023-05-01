@@ -40,6 +40,7 @@ $ignore_module_ini = true;
 
 include '../../include/baseTheme.php';
 include '../../include/lib/textLib.inc.php';
+include '../htmlpurifier/library/HTMLPurifier.auto.php';
 
 $nameTools = $langMyAgenda;
 $tool_content = "";
@@ -53,9 +54,11 @@ if (isset($uid))
 		cours.intitule i, cours.titulaires t
 	                        FROM cours, cours_user
 	                        WHERE cours.cours_id = cours_user.cours_id
-	                        AND cours_user.user_id = '$uid'");
-	@$year = $_GET['year'];
-	@$month = $_GET['month'];
+	                        AND cours_user.user_id = '".mysql_real_escape_string(intval($uid))."'");
+
+	$purifier = new HTMLPurifier(HTMLPurifier_Config::createDefault());
+	@$year = $purifier->purify($_GET['year']);
+	@$month = $purifier->purify($_GET['month']);
 	if (($year==NULL)&&($month==NULL))
 	{
 		$today = getdate();
@@ -84,11 +87,10 @@ $langToday);
 function get_agendaitems($query, $month, $year) {
 	global $urlServer;
 	$items = array();
-
 	// get agenda-items for every course
 	while ($mycours = mysql_fetch_array($query))
 	{
-	$result = db_query("SELECT * FROM agenda WHERE month(day)='$month' AND year(day)='$year'","$mycours[k]");
+	$result = db_query("SELECT * FROM agenda WHERE month(day)=".mysql_real_escape_string(intval($month))." AND year(day)=".mysql_real_escape_string(intval($year))."","$mycours[k]");
 
 	    while ($item = mysql_fetch_array($result))
 	    {
@@ -137,8 +139,8 @@ function display_monthcalendar($agendaitems, $month, $year, $weekdaynames, $mont
   	//Start the week on monday
 	$startdayofweek = $dayone['wday']<>0 ? ($dayone['wday']-1) : 6;
 
-	$backwardsURL = "$_SERVER[PHP_SELF]?month=".($month==1 ? 12 : $month-1)."&year=".($month==1 ? $year-1 : $year);
-	$forewardsURL = "$_SERVER[PHP_SELF]?month=".($month==12 ? 1 : $month+1)."&year=".($month==12 ? $year+1 : $year);
+	$backwardsURL = htmlspecialchars($_SERVER[PHP_SELF]) ."?month=".($month==1 ? 12 : $month-1)."&year=".($month==1 ? $year-1 : $year);
+	$forewardsURL = htmlspecialchars($_SERVER[PHP_SELF]) ."?month=".($month==12 ? 1 : $month+1)."&year=".($month==12 ? $year+1 : $year);
 
 	$tool_content .=  "\n  <table width=99% class=\"DepTitle\">\n  <thead>";
   	$tool_content .=  "\n  <tr>";

@@ -68,6 +68,16 @@ $tool_content = "";
 ******************************************************************************/
 // Save new config.php
 if (isset($submit))  {
+  if (empty($_GET['token'])) {
+    header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+        exit(); 
+  }
+    
+    if ($_SESSION['token'] !== $_GET['token']) {
+    header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+        exit(); 
+  }
+  unset($_SESSION['token']);
 	// Make config directory writable
 	@chmod( "../../config",777 );
 	@chmod( "../../config", 0777 );
@@ -159,7 +169,7 @@ else {
 	}
 	// Constract the form
 	$tool_content .= "
-    <form action=\"".$_SERVER['PHP_SELF']."\" method=\"post\">";
+    <form action=\"".htmlspecialchars($_SERVER['PHP_SELF'])."\" method=\"post\">";
 	$tool_content .= "
 
   <table class=\"FormData\" width=\"99%\" align=\"left\">

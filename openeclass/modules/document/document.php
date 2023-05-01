@@ -153,7 +153,7 @@ function process_extracted_file($p_event, &$p_header) {
 
 
 // Create a path with directory names given in array $path_components
-// under base path $path, inserting the appropriate entries in 
+// under base path $path, inserting the appropriate entries in
 // document table.
 // Returns the full encoded path created.
 function make_path($path, $path_components)
@@ -677,7 +677,7 @@ if (mysql_num_rows($sql) == 0) {
                 }
                 if ($sort == $this_sort) {
                         $this_reverse = !$reverse;
-                        $indicator = ' <img src="../../template/classic/img/arrow_' . 
+                        $indicator = ' <img src="../../template/classic/img/arrow_' .
                                 ($reverse? 'up': 'down') . '.gif" border="0"/>';
                 } else {
                         $this_reverse = $reverse;
@@ -702,7 +702,7 @@ if (mysql_num_rows($sql) == 0) {
         $tool_content .= "\n    <td class='DocHead'><div align='left'><b>" .
                          headlink($langName, 'name') . '</b></div></td>';
         $tool_content .= "\n    <td width='15%' class='DocHead'><div align='center'><b>$langSize</b></div></td>";
-        $tool_content .= "\n    <td width='15%' class='DocHead'><div align='center'><b>" . 
+        $tool_content .= "\n    <td width='15%' class='DocHead'><div align='center'><b>" .
                          headlink($langDate, 'date') . '</b></div></td>';
 	if($is_adminOfCourse) {
 		$tool_content .= "\n    <td width='20%' class='DocHead'><div align='center'><b>$langCommands</b></div></td>";

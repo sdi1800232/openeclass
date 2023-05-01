@@ -31,6 +31,8 @@ $require_help = TRUE;
 $helpTopic = 'User';
 
 include '../../include/baseTheme.php';
+include '../htmlpurifier/library/HTMLPurifier.auto.php';
+$purifier = new HTMLPurifier(HTMLPurifier_Config::createDefault());
 
 $nameTools = $langAddUser;
 $navigation[] = array ("url"=>"user.php", "name"=> $langAdminUsers);
@@ -55,12 +57,21 @@ if (isset($add)) {
 		$tool_content .= "<br /><a href=\"adduser.php\">$langAddBack</a></p><br />\n";
 
 } else {
+$tool_content .= "<form method='post' action='". htmlspecialchars($_SERVER[PHP_SELF]) ."'>";
+if(!isset($search_nom)){
+	$search_nom = "";
+}else {
+	$search_nom = mysql_real_escape_string($purifier->purify($search_nom));
+}
 
-	$tool_content .= "<form method='post' action='$_SERVER[PHP_SELF]'>";
-
-if(!isset($search_nom)) $search_nom = "";
-if(!isset($search_prenom)) $search_prenom = "";
-if(!isset($search_uname)) $search_uname = "";
+if(!isset($search_prenom)) {$search_prenom = "";
+} else {
+	$search_prenom = mysql_real_escape_string($purifier->purify($search_prenom));
+}
+if(!isset($search_uname)) {$search_uname = "";
+} else {
+	$search_uname = mysql_real_escape_string($purifier->purify($search_uname));
+}
 $tool_content .= <<<tCont
 
     <table width="99%" class="FormData">
@@ -138,14 +149,14 @@ tCont3;
 				$tool_content .= "<td align=\"right\">$i.</td><td>$myrow[prenom]</td>
       				<td>$myrow[nom]</td><td>$myrow[username]</td>
       				<td align=\"center\">
-				<a href=\"$_SERVER[PHP_SELF]?add=$myrow[user_id]\">$langRegister</a></td></tr>\n";
+				<a href=\"". htmlspecialchars($_SERVER[PHP_SELF]) ."?add=$myrow[user_id]\">$langRegister</a></td></tr>\n";
 				$i++;
 			}
 			$tool_content .= "</tbody>";
 			$tool_content .= "</table>";
         		}
 			db_query("DROP TABLE lala");
-		} 
+		}
 	}
 }
 

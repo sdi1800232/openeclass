@@ -75,7 +75,16 @@ if (isset($search) && ($search=="yes")) {
 }
 // Update course status
 if (isset($submit))  {
-  // Update query
+	if (empty($_GET['token'])) {
+		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+						exit(); 
+}
+		
+		if ($_SESSION['token'] !== $_GET['token']) {
+		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+						exit(); 
+}
+unset($_SESSION['token']);
 	$sql = mysql_query("UPDATE cours SET visible='$formvisible' WHERE code='".mysql_real_escape_string($_GET['c'])."'");
 	// Some changes occured
 	if (mysql_affected_rows() > 0) {
@@ -94,12 +103,12 @@ else {
 	$visible = $row['visible'];
 	$visibleChecked[$visible]="checked";
 	// Constract edit form
-	$tool_content .= "<form action=".$_SERVER['PHP_SELF']."?c=".htmlspecialchars($_GET['c'])."".$searchurl." method=\"post\">
+	$tool_content .= "<form action=".htmlspecialchars($_SERVER['PHP_SELF'])."?c=".htmlspecialchars($_GET['c'])."".$searchurl." method=\"post\">
 	<table class=\"FormData\" width=\"99%\" align=\"left\">
 	<tbody>
 	<tr><th width=\"220\">&nbsp;</th>
 	<td colspan=\"2\"><b>".$langCourseStatusChange."<b></td></tr>";
-	
+
 	$tool_content .= "<tr><th class=\"left\" rowspan=\"3\">$langConfTip</th>
 	<td width=\"1\"><input type=\"radio\" name=\"formvisible\" value=\"2\"".@$visibleChecked[2]."></td>
 	<td>".$langPublic."</td>

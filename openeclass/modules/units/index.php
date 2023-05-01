@@ -25,7 +25,7 @@
 * =========================================================================*/
 
 /*
-Units display module	
+Units display module
 */
 
 $require_current_course = true;
@@ -73,7 +73,7 @@ _editor_lang = '$lang_editor';
 		edit_res($res_id);
 	}
 }  elseif(isset($_REQUEST['edit_res_submit'])) { // edit resource
-	$res_id = intval($_REQUEST['resource_id']);	
+	$res_id = intval($_REQUEST['resource_id']);
 	if ($id = check_admin_unit_resource($res_id)) {
 		@$restitle = autoquote(trim($_REQUEST['restitle']));
                 $rescomments = autoquote(trim($_REQUEST['rescomments']));
@@ -89,7 +89,7 @@ _editor_lang = '$lang_editor';
 		db_query("DELETE FROM unit_resources WHERE id = '$res_id'", $mysqlMainDb);
 		$tool_content .= "<p class='success_small'>$langResourceCourseUnitDeleted</p>";
 	}
-} elseif (isset($_REQUEST['vis'])) { // modify visibility in text resources only 
+} elseif (isset($_REQUEST['vis'])) { // modify visibility in text resources only
 	$res_id = intval($_REQUEST['vis']);
 	if ($id = check_admin_unit_resource($res_id)) {
 		$sql = db_query("SELECT `visibility` FROM unit_resources WHERE id=$res_id");
@@ -150,7 +150,7 @@ foreach (array('previous', 'next') as $i) {
         if ($q and mysql_num_rows($q) > 0) {
                 list($q_id, $q_title) = mysql_fetch_row($q);
                 $q_title = htmlspecialchars($q_title);
-                $link[$i] = "<a href='$_SERVER[PHP_SELF]?id=$q_id'>$arrow1$q_title$arrow2</a>";
+                $link[$i] = "<a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?id=$q_id'>$arrow1$q_title$arrow2</a>";
         } else {
                 $link[$i] = '&nbsp;';
         }
@@ -214,11 +214,11 @@ draw($tool_content, 2, 'units', $head_content);
 
 // Check that a specified resource id belongs to a resource in the
 // current course, and that the user is an admin in this course.
-// Return the id of the unit or false if user is not an admin 
+// Return the id of the unit or false if user is not an admin
 function check_admin_unit_resource($resource_id)
 {
 	global $cours_id, $is_adminOfCourse;
-	
+
 	if ($is_adminOfCourse) {
 		$q = db_query("SELECT course_units.id FROM course_units,unit_resources WHERE
 			course_units.course_id = $cours_id AND course_units.id = unit_resources.unit_id
@@ -242,7 +242,7 @@ function show_resources($unit_id)
 		$tool_content .= "<br /><table class='resources' width='99%'>";
 		while ($info = mysql_fetch_array($req)) {
 			show_resource($info);
-		}	
+		}
 		$tool_content .= "</table>\n";
 	}
 }
@@ -251,7 +251,7 @@ function show_resources($unit_id)
 function show_resource($info)
 {
         global $tool_content, $langUnknownResType, $is_adminOfCourse;
-	
+
         if ($info['visibility'] == 'i' and !$is_adminOfCourse) {
                 return;
         }
@@ -543,7 +543,7 @@ function show_wiki($title, $comments, $resource_id, $wiki_id, $visibility)
 		$imagelink = $link .
                         "<img src='../../template/classic/img/wiki_" .
 			($visibility == 'i'? 'off': 'on') . ".gif' /></a>";
-		
+
 	}
         if (!empty($comments)) {
                 $comment_box = "<tr><td width='3%'>&nbsp;</td><td width='82%'>$comments</td>";
@@ -568,19 +568,19 @@ function actions($res_type, $resource_id, $status)
         $icon_vis = ($status == 'v')? 'visible.gif': 'invisible.gif';
 
         if ($status != 'del') {
-                $content = "<td width='3%'><a href='$_SERVER[PHP_SELF]?edit=$resource_id'>" .
+                $content = "<td width='3%'><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?edit=$resource_id'>" .
                 "<img src='../../template/classic/img/edit.gif' title='$langEdit' /></a></td>";
         } else {
                 $content = '<td width="3%">&nbsp;</td>';
         }
-        $content .= "<td width='3%'><a href='$_SERVER[PHP_SELF]?del=$resource_id'" .
+        $content .= "<td width='3%'><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?del=$resource_id'" .
                                         " onClick=\"return confirmation();\">" .
                                         "<img src='../../template/classic/img/delete.gif' " .
                                         "title='$langDelete'></img></a></td>";
-	 
+
 	if ($status != 'del') {
-		if ($res_type == 'text' or $res_type == 'video' or $res_type == 'forum' or $res_type == 'topic') { 
-			$content .= "<td width='3%'><a href='$_SERVER[PHP_SELF]?vis=$resource_id'>" .
+		if ($res_type == 'text' or $res_type == 'video' or $res_type == 'forum' or $res_type == 'topic') {
+			$content .= "<td width='3%'><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?vis=$resource_id'>" .
                                         "<img src='../../template/classic/img/$icon_vis' " .
                                         "title='$langVisibility'></img></a></td>";
 		} else {
@@ -590,13 +590,13 @@ function actions($res_type, $resource_id, $status)
                 $content .= '<td width="3%">&nbsp;</td>';
         }
         if ($resource_id != $GLOBALS['max_resource_id']) {
-                $content .= "<td width='3%'><a href='$_SERVER[PHP_SELF]?down=$resource_id'>" .
+                $content .= "<td width='3%'><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?down=$resource_id'>" .
                         "<img src='../../template/classic/img/down.gif' title='$langDown'></img></a></td>";
 	} else {
 		$content .= "<td width='3%'>&nbsp;</td>";
 	}
         if (!$first) {
-                $content .= "<td width='3%'><a href='$_SERVER[PHP_SELF]?up=$resource_id'>" .
+                $content .= "<td width='3%'><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?up=$resource_id'>" .
                         "<img src='../../template/classic/img/up.gif' title='$langUp'></img></a></td>";
         } else {
                 $content .= "<td width='3%'>&nbsp;</td>";
@@ -607,10 +607,10 @@ function actions($res_type, $resource_id, $status)
 
 
 // edit resource
-function edit_res($resource_id) 
+function edit_res($resource_id)
 {
 	global $tool_content, $id, $urlServer, $langTitle, $langDescr, $langContents, $langModify;
-	 
+
         $sql = db_query("SELECT id, title, comments, type FROM unit_resources WHERE id='$resource_id'");
         $ru = mysql_fetch_array($sql);
         $restitle = " value='" . htmlspecialchars($ru['title'], ENT_QUOTES) . "'";

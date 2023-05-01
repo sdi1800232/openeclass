@@ -40,7 +40,7 @@ function confirmation() {
 }
 </script>';
 
-$basetoolurl = $_SERVER['PHP_SELF'];
+$basetoolurl = htmlspecialchars($_SERVER['PHP_SELF']);
 if (isset($_GET['type']) and $_GET['type'] == 'user') {
         $list_statut = 5;
         $nameTools = $langUserOpenRequests;
@@ -86,14 +86,14 @@ switch ($show) {
       <div id='operations_container'>
         <ul id='opslist'>
 	  <li><a href='newuseradmin.php$linkget'>$linkreg</a></li>
-          <li><a href='$_SERVER[PHP_SELF]?show=closed$reqtype'>$langReqHaveClosed</a></li>
-          <li><a href='$_SERVER[PHP_SELF]?show=rejected$reqtype'>$langReqHaveBlocked</a></li>
-          <li><a href='$_SERVER[PHP_SELF]?show=accepted$reqtype'>$langReqHaveFinished</a></li>
+          <li><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?show=closed$reqtype'>$langReqHaveClosed</a></li>
+          <li><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?show=rejected$reqtype'>$langReqHaveBlocked</a></li>
+          <li><a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?show=accepted$reqtype'>$langReqHaveFinished</a></li>
         </ul>
       </div>";
 
 // -----------------------------------
-// display closed requests 
+// display closed requests
 // ----------------------------------
 if (!empty($show) && ($show=="closed")) {
 	if (!empty($id) && ($id>0)) {
@@ -134,14 +134,14 @@ if (!empty($show) && ($show=="closed")) {
 				<small>".nice_format(date("Y-m-d", strtotime($req['date_closed'])))."</small></td>";
             		$tool_content .= "<td>".$req['comment']."</td>";
 			$tool_content .= "<td align=center>
-			<a href='$_SERVER[PHP_SELF]?id=$req[rid]&show=closed$reqtype'>$langRestore</a></td>\n  </tr>";
+			<a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?id=$req[rid]&show=closed$reqtype'>$langRestore</a></td>\n  </tr>";
 		$k++;
 		}
 	}
 	$tool_content .= "\n  </tbody>\n  </table>\n";
 
 // -----------------------------------
-// display rejected requests 
+// display rejected requests
 // ----------------------------------
 } elseif (!empty($show) && ($show=="rejected")) {
 	if (!empty($id) && ($id>0)) {
@@ -185,7 +185,7 @@ if (!empty($show) && ($show=="closed")) {
 				<small>".nice_format(date("Y-m-d", strtotime($req['date_closed'])))."</small></td>";
                 	$tool_content .= "<td>".$req['comment']."</td>";
 			$tool_content .= "<td align=center>
-			<a href='$_SERVER[PHP_SELF]?id=$req[rid]&show=closed$reqtype'>$langRestore</a>
+			<a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?id=$req[rid]&show=closed$reqtype'>$langRestore</a>
 			</td></tr>";
 			$k++;
 		}
@@ -246,6 +246,16 @@ if (!empty($show) && ($show=="closed")) {
                 }
 		break;
 	case '2':
+		if (empty($_GET['token'])) {
+			header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+				exit(); 
+		  }
+			
+			if ($_SESSION['token'] !== $_GET['token']) {
+			header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+				exit(); 
+		  }
+		  unset($_SESSION['token']);
 		$submit = isset($_POST['submit'])?$_POST['submit']:'';
 		if(!empty($submit)) {
 			// post the comment and do the delete action
@@ -271,12 +281,13 @@ $langEmail: $emailhelpdesk";
 				}
 			}
 		} else {
+			
 			// display the form
 			$r = db_query("SELECT comment, profname, profsurname, profemail, statut
 				FROM prof_request WHERE rid = '$id'");
 			$d = mysql_fetch_assoc($r);
                         $warning = ($d['statut'] == 5)? $langWarnReject: $langGoingRejectRequest;
-			$tool_content .= "<form action='$_SERVER[PHP_SELF]' method='post'>
+			$tool_content .= "<form action='". htmlspecialchars($_SERVER[PHP_SELF]) ."' method='post'>
 			<table width='99%' class='FormData'>
 			<tbody><tr>
 			<th width='220'>&nbsp;</th>
@@ -302,6 +313,7 @@ $langEmail: $emailhelpdesk";
 			<tr><th class='left'>&nbsp;</th>
 			<td><input type='submit' name='submit' value='$langRejectRequest'>&nbsp;&nbsp;<small>($langRequestDisplayMessage)</small></td>
 			</tr></tbody></table>
+			
 			</form>";
 			}
 		break;
@@ -319,7 +331,7 @@ else
 	$tool_content .= "<table class=\"FormData\" width=\"99%\" align=\"left\">";
 	$tool_content .= table_header();
 	$tool_content .= "<tbody>";
- 	$sql = db_query("SELECT rid,profname,profsurname,profuname,profemail,proftmima, 
+ 	$sql = db_query("SELECT rid,profname,profsurname,profuname,profemail,proftmima,
 			profcomm, date_open, comment, profpassword, lang
 			FROM prof_request
                         WHERE (status = 1 AND statut = $list_statut)");
@@ -347,8 +359,8 @@ else
 			<small>".nice_format(date("Y-m-d", strtotime($req['date_open'])))."</small></td>";
 		$tool_content .= "<td align='center'>$req[comment]</td>";
 		$tool_content .= "<td align='center'>
-		<a href='$_SERVER[PHP_SELF]?id=$req[rid]&amp;close=1$reqtype' onclick='return confirmation();'>$langClose</a><br />
-		<a href='$_SERVER[PHP_SELF]?id=$req[rid]&amp;close=2$reqtype'>$langRejectRequest</a>";
+		<a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?id=$req[rid]&amp;close=1$reqtype' onclick='return confirmation();'>$langClose</a><br />
+		<a href='". htmlspecialchars($_SERVER[PHP_SELF]) ."?id=$req[rid]&amp;close=2$reqtype'>$langRejectRequest</a>";
 		switch($req['profpassword']) {
 			case 'ldap': $tool_content .= "<br />
 					<a href='../auth/ldapnewprofadmin.php?id=".urlencode($req['rid'])."&amp;auth=4'>
@@ -377,7 +389,7 @@ else
 // If show is set then we return to listreq, else return to admin index.php
 //if (isset($close) or isset($closed)) {
 if (!empty($show)) {
-	$tool_content .= "<p align=\"right\"><a href=\"$_SERVER[PHP_SELF]\">$langBackRequests</a></p><br>";
+	$tool_content .= "<p align=\"right\"><a href=\"". htmlspecialchars($_SERVER[PHP_SELF]) ."\">$langBackRequests</a></p><br>";
 }
 	$tool_content .= "<p align=\"right\"><a href=\"index.php\">$langBack</a></p>";
 draw($tool_content, 3, null, $head_content);
@@ -387,13 +399,13 @@ draw($tool_content, 3, null, $head_content);
 // --------------------------------------
 
 function table_header($addon = FALSE, $message = FALSE) {
-	
+
 	global $langName, $langSurname, $langUsername, $langEmail, $langFaculty, $langTel;
 	global $langDate, $langComments, $langActions;
 	global $langDateRequest_small;
 
 	$string = "";
-	if ($addon) { 
+	if ($addon) {
 		$rowspan=2;
 		$datestring = "<th align='center' colspan='2'>$langDate</th>
 		<th scope='col' rowspan='$rowspan' align='center'>$langComments</th>
@@ -414,7 +426,7 @@ function table_header($addon = FALSE, $message = FALSE) {
 	<th scope='col' rowspan='$rowspan' class='left'>$langEmail</th>
 	<th scope='col' rowspan='$rowspan' class='left'>$langFaculty</th>
 	<th scope='col' rowspan='$rowspan' align='center'>$langTel</th>";
-	$string .= $datestring; 
+	$string .= $datestring;
 	$string .= "</tr></thead>";
 
 return $string;

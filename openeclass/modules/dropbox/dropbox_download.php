@@ -26,15 +26,15 @@
 /**
  * handles downloads of files. Direct downloading is prevented because of an .htaccess file in the
  * dropbox directory. So everything goes through this script.
- * 
+ *
  * 1. Initialising vars
- * 2. Authorisation 
+ * 2. Authorisation
  * 3. Sanity check of get data & file
  * 4. Send headers
  * 5. Send file
- * 
+ *
  */
- 
+
 require_once("dropbox_init1.inc.php");
 require_once("dropbox_class.inc.php");
 
@@ -48,7 +48,7 @@ if (!isset($uid))
     exit();
 }
 
-if (isset($_GET['mailing'])) 
+if (isset($_GET['mailing']))
 {
 	checkUserOwnsThisMailing($_GET['mailing'], $uid);
 }
@@ -78,19 +78,19 @@ if ( !is_file( $path))
  * SEND HEADERS
  * ========================================
  */
-require_once("mime.inc.php"); 
+require_once("mime.inc.php");
 
 $fileparts = explode( '.', $file);
 $filepartscount = count( $fileparts);
 
 if (($filepartscount > 1) && isset($mimetype[$fileparts [$filepartscount - 1]]))
-{ 
+{
     // give hint to browser about filetype
     header( "Content-type: " . $mimetype[$fileparts [$filepartscount - 1]] . "\n");
-    header( "Content-Disposition: inline; filename=$file\n");
+  	header( "Content-Disposition: inline; filename=$file\n");
 }
 else
-{ 
+{
 	//no information about filetype: force a download dialog window in browser
 	header( "Content-type: application/octet-stream\n");
 	header( "Content-Disposition: inline; filename=$file\n");
@@ -100,7 +100,7 @@ else
  * Note that if you use these two headers from a previous example:
  * header('Cache-Control: no-cache, must-revalidate');
  * header('Pragma: no-cache');
- * before sending a file to the browser, the "Open" option on Internet Explorer's file download dialog will not work properly. If the user clicks "Open" instead of "Save," the target application will open an empty file, because the downloaded file was not cached. The user will have to save the file to their hard drive in order to use it. 
+ * before sending a file to the browser, the "Open" option on Internet Explorer's file download dialog will not work properly. If the user clicks "Open" instead of "Save," the target application will open an empty file, because the downloaded file was not cached. The user will have to save the file to their hard drive in order to use it.
  * Make sure to leave these headers out if you'd like your visitors to be able to use IE's "Open" option.
  */
 header("Pragma: \n");

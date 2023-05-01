@@ -94,11 +94,11 @@ cData;
 	$tool_content .= "<input type=\"submit\" name=\"";
 	if (isset($submitQuestion))
 		$tool_content .= "submitQuestion \" ";
-	else	
+	else
 		$tool_content .= "submitAnswers \" ";
 	$tool_content .= "value='$langOk'>&nbsp;&nbsp;
 		<input type='submit' name='buttonBack' value='$langCancel'>";
-	
+
      	$tool_content .= <<<cData
 
     </td></tr>
@@ -132,7 +132,7 @@ cData;
 		$tool_content .= "<br/><center><img src='$picturePath/quiz-$questionId' border='0'></center><br/>";
 	}
 
-	$tool_content .= "</th></tr>";	
+	$tool_content .= "</th></tr>";
 	$tool_content .= "<tr><td colspan='2'><b><u>$langQuestionAnswers</u>:</b>";
 
 	// doesn't show the edit link if we come from the question pool to pick a question for an exercise

@@ -34,7 +34,7 @@ if(isset($submitQuestion)) {
 	{
 		$msgErr = $langGiveQuestion;
 	}
-	// checks if the question is used in several exercises	
+	// checks if the question is used in several exercises
 	elseif($exerciseId && !isset($modifyIn) && $objQuestion->selectNbrExercises() > 1)
 	{
 	        // if a picture has been set
@@ -60,9 +60,9 @@ if(isset($submitQuestion)) {
 		// copies answers from $modifyQuestion to $questionId
 		$objAnswerTmp->duplicate($questionId);
 		// destruction of the Answer object
-		unset($objAnswerTmp);	
+		unset($objAnswerTmp);
 	}
-	
+
 	$objQuestion->read($modifyQuestion);
 	$objQuestion->updateTitle($questionName);
 	$objQuestion->updateDescription($questionDescription);
@@ -136,9 +136,9 @@ if(isset($newQuestion) || isset($modifyQuestion)) {
 
 	if ($okPicture) {
 		$tool_content .= "$langReplacePicture";
-	} else { 
+	} else {
 		$tool_content .= "$langAddPicture";
-	}	
+	}
 
 	$tool_content .= " :</th><td>";
 	if($okPicture) {
@@ -149,8 +149,8 @@ if(isset($newQuestion) || isset($modifyQuestion)) {
 	if ($okPicture) {
 		$tool_content .= "<tr><th class='left'>$langDeletePicture :</th>
 		<td><input type=\"checkbox\" name=\"deletePicture\" value=\"1\" ";
-		if(isset($deletePicture)) 
-			$tool_content .= 'checked="checked"'; 
+		if(isset($deletePicture))
+			$tool_content .= 'checked="checked"';
 		$tool_content .= "> ";
 		$tool_content .= "</td></tr>";
 	}

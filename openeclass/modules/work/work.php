@@ -129,6 +129,9 @@ hContent;
 //-------------------------------------------
 // main program
 //-------------------------------------------
+if (isset($id)){
+  $id = mysql_real_escape_string(intval($id));
+}
 
 if ($is_adminOfCourse) {
 	if (isset($grade_comments)) {
@@ -314,7 +317,7 @@ function submit_work($id) {
 	if (move_uploaded_file($_FILES['userfile']['tmp_name'], "$workPath/$filename")) {
 		$msg2 = "$langUploadSuccess";//to message
 		$group_id = user_group($uid, FALSE);
-		if ($group_sub == 'yes' and !was_submitted(-1, $group_id, $id)) {
+    if ($group_sub == 'yes' and !was_submitted(-1, $group_id, $id)) {
 			delete_submissions_by_uid(-1, $group_id, $id);
 			db_query("INSERT INTO assignment_submit
 				(uid, assignment_id, submission_date, submission_ip, file_path,
@@ -355,26 +358,26 @@ function new_assignment()
 
 
 	$tool_content .= "
-  <form action='work.php' method='post' onsubmit='return checkrequired(this, \"title\");'>
+	<form action='work.php' method='post' onsubmit='return checkrequired(this, \"title\");'>
     <table width='99%' class='FormData'>
     <tbody>
     <tr>
-      <th width='220'>&nbsp;</th>
-      <td><b>$m[WorkInfo]</b></td>
+	<th width='220'>&nbsp;</th>
+	<td><b>$m[WorkInfo]</b></td>
     </tr>
     <tr>
-      <th class='left'>$m[title]:</th>
-      <td><input type='text' name='title' size='55' class='FormData_InputText' /></td>
+	<th class='left'>$m[title]:</th>
+	<td><input type='text' name='title' size='55' class='FormData_InputText' /></td>
     </tr>
     <tr>
-      <th class='left'>$m[description]:</th>
-      <td>
-        <table class='xinha_editor'>
-        <tr>
-          <td><textarea id='xinha' name='desc' style='width:100%'>";
-        if ($desc) {
-                $tool_content .= $desc;
-        }
+	<th class='left'>$m[description]:</th>
+	<td>
+	<table class='xinha_editor'>
+	<tr>
+	<td><textarea id='xinha' name='desc' style='width:100%'>";
+	if ($desc) {
+		$tool_content .= $desc;
+	}
         $tool_content .= "</textarea></td>
         </tr>
         </table>
@@ -803,7 +806,7 @@ function show_assignment($id, $message = FALSE)
 		WHERE assign.assignment_id='$id' AND user.user_id = assign.uid
 		ORDER BY $order $rev");
 
-	/*  The query is changed (AND assign.grade<>'' is appended) in order to constract the chart of 
+	/*  The query is changed (AND assign.grade<>'' is appended) in order to constract the chart of
 	 * grades distribution according to the graded works only (works that are not graded are omitted). */
 	$numOfResults = db_query("SELECT *
 		FROM `$GLOBALS[code_cours]`.assignment_submit AS assign,
@@ -811,7 +814,7 @@ function show_assignment($id, $message = FALSE)
 		WHERE assign.assignment_id='$id' AND user.user_id = assign.uid AND assign.grade<>''
 		ORDER BY $order $rev");
 	$num_resultsForChart = mysql_num_rows($numOfResults);
-	
+
 	$num_results = mysql_num_rows($result);
 	if ($num_results > 0) {
 		if ($num_results == 1) {
@@ -944,7 +947,7 @@ cData;
 
 	$tool_content .="</tbody></table>";
 
-
+	
 	$tool_content .= "
     <br />
     <table class='FormData' width='99%'>
@@ -955,6 +958,7 @@ cData;
     </tr>
     </tbody>
     </table>
+	
     </form>
 	";
 
@@ -1174,7 +1178,7 @@ function submit_grade_comments($id, $sid, $grade, $comment)
 
 	$stupid_user = 0;
 
-	/*  If check expression is changed by nikos, in order to give to teacher the ability to 
+	/*  If check expression is changed by nikos, in order to give to teacher the ability to
 	 * assign comments to a work without assigning grade. */
 	if (!is_numeric($grade) && '' != $grade ) {
 		$tool_content .= $langWorkWrongInput;
@@ -1246,7 +1250,7 @@ function download_assignments($id)
 	$filename = "$GLOBALS[currentCourseID]_work_$id.zip";
 	chdir($workPath);
 	create_zip_index("$secret/index.html", $id);
-	$zip = new PclZip($filename);
+  $zip = new PclZip($filename);
 	$flag = $zip->create($secret, "work_$id", $secret);
 	header("Content-Type: application/x-zip");
 	header("Content-Disposition: attachment; filename=$filename");

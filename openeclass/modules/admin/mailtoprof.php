@@ -69,6 +69,17 @@ $tool_content = "";
 
 // Send email after form post
 if (isset($_POST['submit']) && ($_POST['body_mail'] != "") && ($_POST['submit'] == $langSend)) {
+	if (empty($_GET['token'])) {
+		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+						exit(); 
+}
+		
+		if ($_SESSION['token'] !== $_GET['token']) {
+		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+						exit(); 
+}
+unset($_SESSION['token']);
+
 	// Where to send the email
 	if ($_POST['sendTo'] == "0") {
 		// All users
@@ -97,9 +108,10 @@ $langEmail : $emailhelpdesk
 	// Display result and close table correctly
 	$tool_content .= "<p class=\"success_small\">$emailsuccess</p>";
 } else {
+		
         // Display form to administrator
         $tool_content .= "
-<form action='$_SERVER[PHP_SELF]' method='post'>
+<form action='". htmlspecialchars($_SERVER[PHP_SELF]) ."' method='post'>
   <table class='FormData'>
   <tbody>
   <tr>
@@ -120,6 +132,7 @@ $langEmail : $emailhelpdesk
   </tr>
   </tbody>
   </table>
+  
 </form>";
 
 }

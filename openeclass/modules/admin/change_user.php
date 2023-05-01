@@ -39,6 +39,16 @@ $navigation[] = array("url" => "index.php", "name" => $langAdmin);
 $tool_content = '';
 
 if (isset($_POST['username'])) {
+        if (empty($_GET['token'])) {
+                header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+                                exit(); 
+        }
+                
+                if ($_SESSION['token'] !== $_GET['token']) {
+                header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+                                exit(); 
+        }
+        unset($_SESSION['token']);
 	$result = db_query("SELECT user_id, nom, username, password, prenom, statut, email, iduser is_admin, perso, lang
                 FROM user LEFT JOIN admin
                 ON user.user_id = admin.iduser
@@ -73,7 +83,7 @@ if (isset($_POST['username'])) {
         } else {
                 $tool_content = "<div class='caution_small'>" . sprintf($langChangeUserNotFound, $_POST['username']) . "</div>";
         }
-} 
+}
 
 $tool_content .= "<form action='$_SERVER[PHP_SELF]' method='post'>$langUsername: <input type='text' name='username' /></form>";
 draw($tool_content,3,'admin');

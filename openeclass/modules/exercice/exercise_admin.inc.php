@@ -94,23 +94,23 @@ if(isset($modifyExercise))
 	<td><textarea wrap='virtual' ".
 		"name='exerciseDescription' cols='50' rows='4' style='width:400px;' class='FormData_InputText'>".str_replace('{','&#123;',htmlspecialchars($exerciseDescription))."</textarea></td>
 	</tr>";
-	
+
 	$tool_content .= "<tr><th class=\"left\">".$langExerciseType." :</th>
 	<td>"."<input type='radio' name='exerciseType' value='1'";
-	
+
 	if ($exerciseType <= 1) {
 		$tool_content .= " checked='checked'";
 	}
 	$tool_content .= "> ".$langSimpleExercise."
 	<br>
 	<input type='radio' name='exerciseType' value='2'";
-	
+
 	if ($exerciseType >= 2) {
 		$tool_content .= 'checked="checked"';
 	}
 	$tool_content .= "> ".$langSequentialExercise."</td>
 	</tr>";
-	
+
 	if (isset($exerciseStartDate)) {
 		$start_cal_Excercise = jscal_html('exerciseStartDate', $exerciseStartDate);
 	} else {
@@ -123,18 +123,18 @@ if(isset($modifyExercise))
 	}
 	$tool_content .= "<tr><th class=\"left\">".$langExerciseStart." :</th>"."
 	<td>$start_cal_Excercise</td></tr>";
-	
+
 	$tool_content .= "<th class=\"left\">".$langExerciseEnd." :</th>"."
 	<td>$end_cal_Excercise</td>
 	</tr>";
-	
+
 	$tool_content .= "<tr>
 	<th class=\"left\">".$langExerciseConstrain." :</th>"."
 	<td><input type=\"text\" name=\"exerciseTimeConstrain\" size=\"3\" maxlength=\"3\" ".
 	"value=\"".htmlspecialchars($exerciseTimeConstrain)."\" class=\"FormData_InputText\">&nbsp;&nbsp;".
 	$langExerciseConstrainUnit." &nbsp;&nbsp;&nbsp;&nbsp;(".$langExerciseConstrainExplanation.")</td>
 	</tr>";
-	
+
 	$tool_content .= "<tr>
 	<th class=\"left\">".$langExerciseAttemptsAllowed." :</th>"."
 	<td><input type=\"text\" name=\"exerciseAttemptsAllowed\" size=\"3\" maxlength=\"2\"".
@@ -163,7 +163,7 @@ if(isset($modifyExercise))
 	<br><input type='radio' name='dispresults' value='0'".  $extra2 .">&nbsp;$langAnswersNotDisp
 	</td>
 	</tr>";
-	
+
 	$tool_content .= "<tr>
 	<th class='left'>".$langScore." :</th>"."
 	<td><input type='radio' name='dispscore' value='1'". $extras .">&nbsp;$langScoreDisp
@@ -203,7 +203,7 @@ if(isset($modifyExercise))
 	<tr>
 	<th class='left'>$langExerciseDescription :</th>
 	<td>";
-	
+
 	$exerciseDescription = mathfilter($exerciseDescription, 12, "../../courses/mathimg/");
 	$tool_content .= $exerciseDescription;
 	$exerciseStartDate = nice_format($exerciseStartDate);

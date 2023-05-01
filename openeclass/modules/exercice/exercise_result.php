@@ -63,7 +63,7 @@ $exerciseDescription = $objExercise->selectDescription();
 $exerciseDescription_temp = nl2br(make_clickable($exerciseDescription));
 $exerciseDescription_temp = mathfilter($exerciseDescription_temp, 12, "../../courses/mathimg/");
 $displayResults=$objExercise->selectResults();
-$displayScore=$objExercise->selectScore(); 
+$displayScore=$objExercise->selectScore();
 
 $tool_content .= "<table class=\"Exercise\" width=\"99%\"><thead><tr>
 <td colspan=\"2\"><b>".stripslashes($exerciseTitle)."</b>
@@ -143,7 +143,7 @@ foreach($questionList as $questionId) {
 			// construction of the Answer object
 		$objAnswerTmp=new Answer($questionId);
 		$nbrAnswers=$objAnswerTmp->selectNbrAnswers();
-		
+
 		for($answerId=1;$answerId <= $nbrAnswers;$answerId++) {
 			$answer=$objAnswerTmp->selectAnswer($answerId);
 			$answerComment=$objAnswerTmp->selectComment($answerId);
@@ -152,7 +152,7 @@ foreach($questionList as $questionId) {
 			// support for math symbols
 			$answer = mathfilter($answer, 12, "../../courses/mathimg/");
 			$answerComment = mathfilter($answerComment, 12, "../../courses/mathimg/");
-	
+
 			switch($answerType)
 			{
 				// for unique answer
@@ -239,55 +239,55 @@ foreach($questionList as $questionId) {
 						}
 						break;
 			}	// end switch()
-			if ($displayResults == 1) { 
+			if ($displayResults == 1) {
 				if($answerType != MATCHING || $answerCorrect) {
 					if($answerType == UNIQUE_ANSWER || $answerType == MULTIPLE_ANSWER) {
 						$tool_content .= "<tr><td width='5%' style='background: #fff;'>
 						<div align='center'>
 						<img src='../../template/classic/img/";
-		
+
 						if ($answerType == UNIQUE_ANSWER)
 							$tool_content .= "radio";
 						else
 							$tool_content .= "checkbox";
-		
+
 						if ($studentChoice)
 							$tool_content .= "_on";
 						else
 							$tool_content .= '_off';
-			
+
 						$tool_content .= ".gif' border='0'></div></td>
 						<td width='5%' style='background: #fff;'><div align='center'>";
-		
+
 						if ($answerType == UNIQUE_ANSWER)
 							$tool_content .= "<img src=\"../../template/classic/img/radio";
 						else
 							$tool_content .= "<img src=\"../../template/classic/img/checkbox";
 						if ($answerCorrect)
 							$tool_content .= "_on";
-						else	
-							$tool_content .= "_off";	
-						$tool_content .= ".gif\" border=\"0\"></div>";	
+						else
+							$tool_content .= "_off";
+						$tool_content .= ".gif\" border=\"0\"></div>";
 						$tool_content .= "</td><td width='45%' style='background: #fff;'>${answer}</td>
 						<td width='45%' style='background: #fff;'>";
-		
+
 						if ($studentChoice) {
-							$tool_content .= nl2br(make_clickable($answerComment)); 
-						} else { 
+							$tool_content .= nl2br(make_clickable($answerComment));
+						} else {
 							$tool_content .= '&nbsp;';
-						} 
-					
+						}
+
 					$tool_content .= "</td></tr>";
-		
+
 					} elseif($answerType == FILL_IN_BLANKS) {
 						$tool_content .= "<tr>
 						<td style=\"background: #fff;\">".nl2br($answer)."</td></tr>";
 					} else {
 						$tool_content .= "<tr><td width='50%' style='background: #fff;'>${answer}</td>
-						<td width='50%' style='background: #fff;'>${choice[$answerId]} / 
+						<td width='50%' style='background: #fff;'>${choice[$answerId]} /
 						<font color='green'><b>${matching[$answerCorrect]}</b></font></td></tr>";
 					}
-				} 
+				}
 			} // end of if
 		}	// end for()
 	 if ($displayScore == 1) {

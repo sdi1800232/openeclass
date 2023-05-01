@@ -796,9 +796,9 @@ function make_clickable_path($dbTable, $path)
 	global $langRoot, $userGroupId;
 
         if (isset($userGroupId)) {
-                $base = $_SERVER['PHP_SELF'] . '?userGroupId=' . $userGroupId . '&amp;';
+                $base = htmlspecialchars($_SERVER['PHP_SELF']) . '?userGroupId=' . $userGroupId . '&amp;';
         } else {
-                $base = $_SERVER['PHP_SELF'] . '?';
+                $base = htmlspecialchars($_SERVER['PHP_SELF']) . '?';
         }
 
 	$cur = '';
@@ -897,7 +897,7 @@ function display_activation_link($module_id) {
 		WHERE id ='$module_id'", $currentCourseID));
 	$newlien = str_replace("../..","","$v[lien]");
 
-	if (strpos($_SERVER['PHP_SELF'],$newlien) === FALSE) {
+	if (strpos(htmlspecialchars($_SERVER['PHP_SELF']),$newlien) === FALSE) {
 		return FALSE;
 	} else {
 		return TRUE;
@@ -1209,9 +1209,16 @@ function ellipsize($string, $maxlen, $postfix = '...')
 function course_code_to_title($code)
 {
         global $mysqlMainDb;
-        $r = db_query("SELECT intitule FROM cours WHERE code='$code'", $mysqlMainDb);
-        if ($r and mysql_num_rows($r) > 0) {
-                $row = mysql_fetch_row($r);
+		$connection = new mysqli($GLOBALS['mysqlServer'], $GLOBALS['mysqlUser'], $GLOBALS['mysqlPassword'], $mysqlMainDb);
+		
+		$statement = $connection->prepare("SELECT intitule FROM cours WHERE code= ? ");
+		
+		$statement->bind_param("s", $code);
+		$statement->execute();
+		
+		$r = $statement->get_result();
+        if ($r and mysqli_num_rows($r) > 0) {
+                $row = $r->fetch_array();
                 return $row[0];
         } else {
                 return false;

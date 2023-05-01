@@ -247,7 +247,7 @@ hContent;
             $emailBody = html2text($emailContent);
             $general_to = 'Members of course ' . $currentCourseID;
             while ($myrow = mysql_fetch_array($result)) {
-                    $emailTo = $myrow["email"]; 
+                    $emailTo = $myrow["email"];
                     // check email syntax validity
                     if (!email_seems_valid($emailTo)) {
                             $invalid++;

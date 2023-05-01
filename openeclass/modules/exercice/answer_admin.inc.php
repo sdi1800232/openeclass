@@ -1,4 +1,5 @@
 <?php // $Id: answer_admin.inc.php,v 1.22 2009-11-24 10:57:21 jexi Exp $
+
 /*========================================================================
 *   Open eClass 2.3
 *   E-learning and Course Management System
@@ -52,7 +53,7 @@ if (isset($usedInSeveralExercises) or isset($modifyIn)) {
 		// construction of the duplicated Answers
 		$objAnswer=new Answer($questionId);
 	}
-	
+
 	if($answerType == UNIQUE_ANSWER || $answerType == MULTIPLE_ANSWER)
 	{
 		$correct=unserialize($correct);
@@ -97,7 +98,7 @@ if(isset($submitAnswers) || isset($buttonBack)) {
 				$nbrGoodAnswers++;
 				// a good answer can't have a negative weighting
 				$weighting[$i]=abs($weighting[$i]);
-				// calculates the sum of answer weighting 
+				// calculates the sum of answer weighting
 				if($weighting[$i]) {
 					$questionWeighting+=$weighting[$i];
 				}
@@ -129,7 +130,7 @@ if(isset($submitAnswers) || isset($buttonBack)) {
 			// checks if the question is used in several exercises
 			elseif($exerciseId && !isset($modifyIn) && $objQuestion->selectNbrExercises() > 1)
 			{
-				
+
 				$usedInSeveralExercises=1;
 			} else {
 				// saves the answers into the data base
@@ -212,7 +213,7 @@ if(isset($submitAnswers) || isset($buttonBack)) {
 					// removes the character ']'
 					$temp=substr($temp,$pos+1);
 				}
-			} 
+			}
 		}
 		else
 		{
@@ -306,7 +307,7 @@ if(isset($modifyAnswers)) {
 				$reponse[$i]=$objAnswer->selectAnswer($i);
 				$comment[$i]=$objAnswer->selectComment($i);
 				$weighting[$i]=$objAnswer->selectWeighting($i);
-				
+
 				if($answerType == MULTIPLE_ANSWER)
 				{
 					$correct[$i]=$objAnswer->isCorrect($i);
@@ -455,14 +456,14 @@ cData;
 	<b>".nl2br($questionName)."</b>&nbsp;&nbsp;
 	</th></tr>
 	<tr><td colspan=\"5\" ><b><u>$langQuestionAnswers</u>:</b><br />";
-		
+
 		if($answerType == UNIQUE_ANSWER) {
 			$tool_content .= "<small>$langUniqueSelect</small>";
 		}
 		if($answerType == MULTIPLE_ANSWER) {
 			$tool_content .= "<small>$langMultipleSelect</small>";
 		}
-		
+
 	$tool_content .= "</td></tr></thead>";
 	$tool_content .= "<tbody>";
 
@@ -517,7 +518,7 @@ cData;
 				$tool_content .= " /></td>";
 			}
 		}
-		
+
 		$tool_content .= "<td align=\"center\">
 		<textarea wrap=\"virtual\" rows=\"7\" cols=\"25\" "."name=\"reponse[".$i."]\" class=\"FormData_InputText\">".str_replace('{','&#123;',htmlspecialchars($reponse[$i]))."</textarea>
 		</td>"."
@@ -528,7 +529,7 @@ cData;
 		<input class=\"FormData_InputText\" type=\"text\" name=\"weighting[".$i."]\" size=\"5\" value=\"";
 		if (isset($weighting[$i])) {
 			$tool_content .= $weighting[$i];
-		} else {	
+		} else {
 			$tool_content .= 0;
 		}
 		$tool_content .= "\" /></td></tr>";
@@ -565,7 +566,7 @@ cData;
 if(!isset($setWeighting))
 	$tempSW = "";
 else
-	$tempSW = $setWeighting;	
+	$tempSW = $setWeighting;
 
 
 $tool_content .= <<<cData
@@ -577,7 +578,7 @@ cData;
 		$tool_content .= "<input type=\"hidden\" name=\"weighting\" value=\"\" />\n";
 
     $tool_content .= <<<cData
-	
+
       <table class="FormData" width="99%">
       <tbody>
       <tr>
@@ -591,7 +592,7 @@ cData;
 		<th colspan=\"2\"align=\"center\"><img src=\"".$picturePath."/quiz-".$questionId."\" border=\"0\"></th>
 		</tr>";
 	}
-	
+
     $tool_content .= <<<cData
       <tr>
         <th class="left">$langQuestionAnswers:</th>
@@ -599,9 +600,9 @@ cData;
             <textarea wrap="virtual" name="reponse" cols="70" rows="6" class="FormData_InputText">
 cData;
 
-  if(!isset($submitAnswers) && empty($reponse)) 
-  	$tool_content .= $langDefaultTextInBlanks; 
-  else 
+  if(!isset($submitAnswers) && empty($reponse))
+  	$tool_content .= $langDefaultTextInBlanks;
+  else
   	$tool_content .= htmlspecialchars($reponse);
 
 $tool_content .= <<<cData
@@ -715,18 +716,18 @@ $tool_content .= <<<cData
 
 
 
-  
+
 	<form method="post" action="$_SERVER[PHP_SELF]?modifyAnswers=${modifyAnswers}">
 	<input type="hidden" name="formSent" value="1" />
 	<input type="hidden" name="nbrOptions" value="${nbrOptions}" />
 	<input type="hidden" name="nbrMatches" value="${nbrMatches}" />
-	
+
     <table width="99%" class="FormData">
     <tbody>
     <tr>
       <th width="220" class="left">$langQuestion :</th>
       <td colspan="3" class="left"><b>$questionName</b></td>
-    </tr>	
+    </tr>
 cData;
 
 	if($okPicture) {
@@ -773,27 +774,27 @@ cData;
 			$tool_content .= "<tr>
 			<th class=\"right\">".$j."</th>
 			<td><input type=\"text\" name=\"match[".$i."]\" size=\"58\" value=\"";
-		if(!isset($formSent) && !isset($match[$i])) 
-			$tool_content .= "${langDefaultMakeCorrespond.$j}"; 
-		else 
+		if(!isset($formSent) && !isset($match[$i]))
+			$tool_content .= "${langDefaultMakeCorrespond.$j}";
+		else
 			@$tool_content .= str_replace('{','&#123;',htmlspecialchars($match[$i]));
-	
+
 		$tool_content .= "\" class=\"auth_input\" /></td>
 		<td align=\"center\"><select name=\"sel[".$i."]\"  class=\"auth_input\">";
 		foreach($listeOptions as $key=>$val) {
 			$tool_content .= "<option value=\"".$key."\" ";
-			if((!isset($submitAnswers) && !isset($sel[$i]) 
-				&& $j == 2 && $val == 'B') || @$sel[$i] == $key) 
+			if((!isset($submitAnswers) && !isset($sel[$i])
+				&& $j == 2 && $val == 'B') || @$sel[$i] == $key)
 				$tool_content .= "selected=\"selected\"";
 				$tool_content .= ">".$val."</option>";
 		} // end foreach()
-	
+
 	$tool_content .= "</select></td>
 	<td align=\"center\"><input type=\"text\" size=\"3\" ".
 		"name=\"weighting[".$i."]\" value=\"";
-		if(!isset($submitAnswers) && !isset($weighting[$i])) 
-			$tool_content .= '5'; 
-		else 
+		if(!isset($submitAnswers) && !isset($weighting[$i]))
+			$tool_content .= '5';
+		else
 			$tool_content .= $weighting[$i];
 		$tool_content .= "\"  class=\"auth_input\" /></td></tr>";
 	} // end for()
@@ -814,12 +815,12 @@ cData;
 		$tool_content .= "<tr><th class=\"right\">".$val."</th>
 		<td><input type=\"text\" ".
 			"name=\"option[".$key."]\" size=\"58\" value=\"";
-			
+
 			if(!isset($formSent) && !isset($option[$key]))
-				$tool_content .= ${"langDefaultMatchingOpt$val"}; 
-			else 
+				$tool_content .= ${"langDefaultMatchingOpt$val"};
+			else
 				@$tool_content .= str_replace('{','&#123;',htmlspecialchars($option[$key]));
-				
+
 			$tool_content .= "\" class=\"auth_input\" /></td><td>&nbsp;</td><td>&nbsp;</td></tr>";
 		} // end foreach()
 
@@ -833,7 +834,7 @@ $tool_content .= <<<cData
     </tr>
     </tbody>
     </table>
-	
+
     </form>
 cData;
 

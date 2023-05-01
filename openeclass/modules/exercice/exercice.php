@@ -1,4 +1,5 @@
 <?php
+
 /*========================================================================
 *   Open eClass 2.3
 *   E-learning and Course Management System
@@ -131,7 +132,7 @@ if ($maxpage > 0) {
 	if ($prevpage >= 0) {
  		$tool_content .= "<small><a href='$_SERVER[PHP_SELF]?page=$prevpage'>&lt;&lt; $langPreviousPage</a></small>&nbsp;";
 	}
-	if ($nextpage < $maxpage) { 
+	if ($nextpage < $maxpage) {
 		$tool_content .= "<small><a href='$_SERVER[PHP_SELF]?page=$nextpage'>$langNextPage &gt;&gt;</a></small>";
 	}
 }
@@ -200,12 +201,12 @@ while($row = mysql_fetch_array($result)) {
 		}
 
 		$eid = $row['id'];
-		$NumOfResults = mysql_fetch_array(db_query("SELECT COUNT(*) FROM exercise_user_record 
+		$NumOfResults = mysql_fetch_array(db_query("SELECT COUNT(*) FROM exercise_user_record
 			WHERE eid='$eid'", $currentCourseID));
 
 	if ($NumOfResults[0]) {
 		$tool_content .= "<td align=\"center\"><nobr><a href=\"results.php?exerciseId=".$row['id']."\">".
-		$langExerciseScores1."</a> | 
+		$langExerciseScores1."</a> |
 		<a href=\"csv.php?exerciseId=".$row['id']."\" target=_blank>".$langExerciseScores3."</a></nobr></td>";
 	} else {
 		$tool_content .= "<td align=\"center\">	-&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;- </td>";

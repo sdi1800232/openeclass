@@ -49,7 +49,7 @@ function add_field($table, $field, $type)
 			$retString .= "$langAddField <b>$field</b> $langToTable <b>$table</b>: ";
 			$retString .= " $BAD<br>";
 		}
-	} 
+	}
 	return $retString;
 }
 
@@ -58,14 +58,14 @@ function add_field_after_field($table, $field, $after_field, $type)
 	global $langToTable, $langAddField, $langAfterField, $BAD;
 
 	$retString = "";
-	
+
 	$fields = db_query("SHOW COLUMNS FROM $table LIKE '$field'");
 	if (mysql_num_rows($fields) == 0) {
 		if (!db_query("ALTER TABLE `$table` ADD COLUMN `$field` $type AFTER `$after_field`")) {
 			$retString .= "$langAddField <b>$field</b> $langAfterField <b>$after_field</b> $langToTable <b>$table</b>: ";
 			$retString .= " $BAD<br>";
 		}
-	} 
+	}
 	return $retString;
 }
 
@@ -74,14 +74,14 @@ function rename_field($table, $field, $new_field, $type)
 	global $langToA, $langRenameField, $langToTable, $BAD;
 
 	$retString = "";
-	
+
 	$fields = db_query("SHOW COLUMNS FROM $table LIKE '$new_field'");
 	if (mysql_num_rows($fields) == 0) {
 		if (!db_query("ALTER TABLE `$table` CHANGE  `$field` `$new_field` $type")) {
 			$retString .= "$langRenameField <b>$field</b> $langToA <b>$new_field</b> $langToTable <b>$table</b>: ";
 			$retString .= " $BAD<br>";
-		} 
-	} 
+		}
+	}
 	return $retString;
 }
 
@@ -90,7 +90,7 @@ function delete_field($table, $field) {
 
 	$retString = "";
 	if (!db_query("ALTER TABLE `$table` DROP `$field`")) {
-		$retString .= "$langDeleteField <b>$field</b> $langOfTable <b>$table</b>";	
+		$retString .= "$langDeleteField <b>$field</b> $langOfTable <b>$table</b>";
 		$retString .= " $BAD<br>";
 	}
 	return $retString;
@@ -113,7 +113,7 @@ function merge_tables($table_destination,$table_source,$fields_destination,$fiel
 	global $langMergeTables, $BAD;
 
 	$retString = "";
-	
+
 	$query = "INSERT INTO $table_destination (";
 	foreach($fields_destination as $val)
 	{
@@ -150,7 +150,7 @@ function mysql_field_exists($db,$table,$field)
 
 }
 
-// add index/indexes in specific table columns 
+// add index/indexes in specific table columns
 function add_index($index, $table, $column)  {
 	global $langIndexAdded, $langIndexExists, $langToTable;
 
@@ -172,7 +172,7 @@ function add_index($index, $table, $column)  {
 		$st = '';
 		for ($j=0; $j<count($arguments); $j++) {
 			$st .= $arguments[$j].',';
-		}	
+		}
 		$ind_sql = db_query("SHOW INDEXES FROM `$table`");
 		while ($i = mysql_fetch_array($ind_sql))  {
 			if ($i['Key_name'] == $index) {
@@ -214,14 +214,18 @@ function update_assignment_submit()
 
 // checks if admin user
 function is_admin($username, $password, $mysqlMainDb) {
+  $connection = new mysqli($GLOBALS['mysqlServer'], $GLOBALS['mysqlUser'], $GLOBALS['mysqlPassword'], $mysqlMainDb);
+  $statement = $connection->prepare("SELECT * FROM user, admin WHERE admin.idUser = user.user_id
+            AND user.username = ? AND user.password = ?");
+  $statement->bind_param("ss", $username,$password);
+  $statement->execute();
+  $r = $statement->get_result();
+	$statement->close();
 
-	mysql_select_db($mysqlMainDb);
-	$r = mysql_query("SELECT * FROM user, admin WHERE admin.idUser = user.user_id
-            AND user.username = '$username' AND user.password = '$password'");
-	if (!$r or mysql_num_rows($r) == 0) {
+	if (!$r or mysqli_num_rows($r) == 0) {
 		return FALSE;
 	} else {
-		$row = mysql_fetch_array($r);
+		$row = $r->fetch_assoc();
 		$_SESSION['uid'] = $row['user_id'];
 		//we need to return the user id
 		//or setup session UID with the admin's User ID so that it validates @ init.php
@@ -261,8 +265,8 @@ function convert_db_utf8($database)
 // -------------------------------------
 
 function encode_dropbox_documents($code, $id, $filename, $title) {
-	
-	global $webDir, $langEncDropboxError;	
+
+	global $webDir, $langEncDropboxError;
 
 	$format = get_file_extension($title);
         $new_filename = safe_filename($format);
@@ -315,11 +319,11 @@ function upgrade_course_2_2($code, $lang, $extramessage = '')
 	flush();
 
         db_query("INSERT IGNORE INTO action_types SET id=2, name='exit'");
-	
+
 	// upgrade exercises
- 	db_query("ALTER TABLE `exercise_user_record` 
-		CHANGE `RecordStartDate` `RecordStartDate` DATETIME NOT NULL DEFAULT '0000-00-00'", $code); 
- 	db_query("ALTER TABLE `exercise_user_record` 
+ 	db_query("ALTER TABLE `exercise_user_record`
+		CHANGE `RecordStartDate` `RecordStartDate` DATETIME NOT NULL DEFAULT '0000-00-00'", $code);
+ 	db_query("ALTER TABLE `exercise_user_record`
 		CHANGE `RecordEndDate` `RecordEndDate` DATETIME NOT NULL DEFAULT '0000-00-00'", $code);
 	if (!mysql_field_exists("$code",'exercices','results'))
                 echo add_field('exercices', 'results', "TINYINT(1) NOT NULL DEFAULT '1'");
@@ -359,7 +363,7 @@ function upgrade_course_2_1_3($code, $extramessage = '')
 
         echo "<hr><p>$langUpgCourse <b>$code</b> $extramessage<br />";
 	flush();
-	
+
 	// added field visibility in agenda
 	if (!mysql_field_exists("$code",'agenda','visibility'))
                 echo add_field('agenda', 'visibility', "CHAR(1) NOT NULL DEFAULT 'v'");
@@ -373,7 +377,7 @@ function upgrade_course_2_1_3($code, $extramessage = '')
 
 	// upgrade lp_module me to kainourio content type
 	db_query("ALTER TABLE `lp_module`
-		CHANGE `contentType` `contentType` ENUM('CLARODOC','DOCUMENT','EXERCISE','HANDMADE','SCORM','SCORM_ASSET','LABEL','COURSE_DESCRIPTION','LINK')", 
+		CHANGE `contentType` `contentType` ENUM('CLARODOC','DOCUMENT','EXERCISE','HANDMADE','SCORM','SCORM_ASSET','LABEL','COURSE_DESCRIPTION','LINK')",
 		$code);
 }
 
@@ -400,7 +404,7 @@ function upgrade_course_old($code, $lang, $extramessage = '')
 
         echo "<hr><p>$langUpgIndex <b>$code</b> $extramessage<br />";
 	flush();
-	
+
 	// added field visibility in agenda
 	if (!mysql_field_exists("$code",'agenda','visibility'))
                 echo add_field('agenda', 'visibility', "CHAR(1) NOT NULL DEFAULT 'v'");
@@ -1083,7 +1087,7 @@ function upgrade_course_old($code, $lang, $extramessage = '')
         /* compatibility update
            a) remove entries modules import, external, videolinks, old statistics
            b) correct agenda and video link
-         */ 
+         */
 
        db_query("DELETE FROM accueil WHERE (id = 12 OR id = 13 OR id = 11 OR id=6)", $code);
         update_field("accueil", "lien", "../../modules/agenda/agenda.php", "id", 1);
@@ -1225,7 +1229,7 @@ function upgrade_course_old($code, $lang, $extramessage = '')
         db_query("DROP TABLE IF EXISTS liste_domaines");
 
         // convert to UTF-8
-        convert_db_utf8($code); 
+        convert_db_utf8($code);
 }
 
 

@@ -189,7 +189,7 @@ echo "<frame src='../viewer_toc.php' name='tocFrame' scrolling='no' />";
 echo "<frameset border='0' cols='180,*' frameborder='0'>";
 echo "<frame src='../toc.php' name='tocleftFrame'>";
 echo "<frame src='$moduleStartAssetPage' name='scoFrame'>";
-echo "</frameset>"; 
+echo "</frameset>";
 echo "</frameset>";
 echo "<noframes>";
 echo "<body>";

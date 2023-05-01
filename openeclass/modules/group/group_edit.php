@@ -145,7 +145,7 @@ if (isset($modify))
 		SET name='$name', description='$description', maxStudent='$maxStudent', tutor='$tutor'
 		WHERE id='$userGroupId'", $currentCourseID);
 
-	db_query("UPDATE forums SET forum_name='$name' 
+	db_query("UPDATE forums SET forum_name='$name'
 		  WHERE forum_id=(SELECT forumId FROM student_group WHERE id=$userGroupId)", $currentCourseID);
 
 	// Count number of members

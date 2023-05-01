@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*========================================================================
 *   Open eClass 2.3
 *   E-learning and Course Management System
@@ -61,7 +61,7 @@ if(!isset($_SESSION['objExercise'])) {
 	$objExercise=new Exercise();
 	// if the specified exercise doesn't exist or is disabled
 	if(!$objExercise->read($exerciseId) && (!$is_allowedToEdit)) {
-		$tool_content .= "<p>$langExerciseNotFound</p>";	
+		$tool_content .= "<p>$langExerciseNotFound</p>";
 		draw($tool_content, 2, 'exercice');
 		exit();
 	}
@@ -72,7 +72,7 @@ if(!isset($_SESSION['objExercise'])) {
 $exerciseTitle=$objExercise->selectTitle();
 $exerciseDescription=$objExercise->selectDescription();
 $exerciseDescription_temp = nl2br(make_clickable($exerciseDescription));
-	
+
 $tool_content .= "<table class=\"Exercise\" width=\"99%\"><thead><tr>
 	<td><b>$exerciseTitle</b><br/><br/>${exerciseDescription_temp}
 	</td></tr></thead></table><br/>";
@@ -84,9 +84,9 @@ while($row=mysql_fetch_array($result)) {
 	$sid = $row['uid'];
 	$StudentName = db_query("SELECT nom,prenom,am FROM user WHERE user_id='$sid'", $mysqlMainDb);
 	$theStudent = mysql_fetch_array($StudentName);
-	
+
 	mysql_select_db($currentCourseID);
-	$sql2="SELECT DATE_FORMAT(RecordStartDate, '%Y-%m-%d / %H:%i') AS RecordStartDate, RecordEndDate, TIME_TO_SEC(TIMEDIFF(RecordEndDate,RecordStartDate)) AS TimeDuration, TotalScore, TotalWeighting 
+	$sql2="SELECT DATE_FORMAT(RecordStartDate, '%Y-%m-%d / %H:%i') AS RecordStartDate, RecordEndDate, TIME_TO_SEC(TIMEDIFF(RecordEndDate,RecordStartDate)) AS TimeDuration, TotalScore, TotalWeighting
 	FROM `exercise_user_record` WHERE uid='$sid' AND eid='$exerciseId'";
 	$result2 = db_query($sql2);
 	if (mysql_num_rows($result2) > 0) { // if users found
@@ -103,10 +103,10 @@ while($row=mysql_fetch_array($result)) {
 		$tool_content .= "<tr><td width='150' align='center'><b>".$langExerciseStart."</b></td>";
 		$tool_content .= "<td width='150' align='center'><b>".$langExerciseDuration."</b></td>";
 		$tool_content .= "<td width='150' align='right'><b>".$langYourTotalScore2."</b></td></tr>";
-	
+
 		while($row2=mysql_fetch_array($result2)) {
 			$tool_content .= "<tr><td align='center'>$row2[RecordStartDate]</td>";
-			if ($row2['TimeDuration'] == '00:00:00' or empty($row2['TimeDuration'])) { // for compatibility 
+			if ($row2['TimeDuration'] == '00:00:00' or empty($row2['TimeDuration'])) { // for compatibility
 				$tool_content .= "<td align='center'>$langNotRecorded</td>";
 			} else {
 				$tool_content .= "<td align='center'>".format_time_duration($row2['TimeDuration'])."</td>";
@@ -117,4 +117,4 @@ while($row=mysql_fetch_array($result)) {
 	}
 }
 draw($tool_content, 2, 'exercice');
-?>	
+?>

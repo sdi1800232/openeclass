@@ -79,6 +79,7 @@ function show_edit_form($id, $sid, $assign)
     <form method="post" action="work.php">
     <input type="hidden" name="assignment" value="${id}">
     <input type="hidden" name="submission" value="${sid}">
+    <input type ='hidden'name='csrf' value = '{$_SESSION['token']}'>
 
     <table width="99%" class="FormData">
     <tbody>

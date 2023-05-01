@@ -70,7 +70,7 @@ $action->record('MODULE_ID_LP');
 $tool_content = "";
 
 if (isset($_GET['unit'])) {
-	$_SESSION['unit'] = intval($_GET['unit']); 
+	$_SESSION['unit'] = intval($_GET['unit']);
 }
 
 // $_SESSION

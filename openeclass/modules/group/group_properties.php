@@ -25,10 +25,10 @@
 * =========================================================================*/
 /*
  * Groups Component
- * 
+ *
  * @author Evelthon Prodromou <eprodromou@upnet.gr>
  * @version $Id: group_properties.php,v 1.13 2008-07-28 13:27:16 antonism Exp $
- * 
+ *
  * @abstract This module is responsible for the user groups of each lesson
  *
  */
@@ -140,7 +140,7 @@ tCont;
     </tbody>
     </table>
     <br />
-    
+
     </form>
 
 tCont2;

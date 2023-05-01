@@ -125,7 +125,7 @@ if(!isset($_SESSION['objExercise'])) {
 	// if the specified exercise doesn't exist or is disabled
 	//if(!$objExercise->read($exerciseId) || (!$objExercise->selectStatus() && !$is_allowedToEdit))
 	if(!$objExercise->read($exerciseId) && (!$is_allowedToEdit)) {
-		$tool_content .= "<p>$langExerciseNotFound</p>";	
+		$tool_content .= "<p>$langExerciseNotFound</p>";
 		draw($tool_content, 2, 'exercice');
 		exit();
 	}
@@ -190,7 +190,7 @@ if (!isset($_SESSION['questionList'])) {
 	$questionList=$randomQuestions?$objExercise->selectRandomList():$objExercise->selectQuestionList();
 	// saves the question list into the session
 	$_SESSION['questionList'] = $questionList;
-	
+
 }
 
 $nbrQuestions=sizeof($questionList);

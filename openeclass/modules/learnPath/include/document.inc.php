@@ -29,25 +29,25 @@
 	document.inc.php
 	@last update: 30-06-2006 by Thanos Kyritsis
 	@authors list: Thanos Kyritsis <atkyritsis@upnet.gr>
-	               
+
 	based on Claroline version 1.7 licensed under GPL
 	      copyright (c) 2001, 2006 Universite catholique de Louvain (UCL)
-	      
+
 	      original file: insertMyExercise.php Revision: 1.9.2.2
-	      
+
 	Claroline authors: Piraux Sebastien <pir@cerdecam.be>
                       Lederer Guillaume <led@cerdecam.be>
-==============================================================================        
+==============================================================================
     @Description:
 
     @Comments:
- 
-    @todo: 
+
+    @todo:
 ==============================================================================
 */
 
 /**
- * CLAROLINE 
+ * CLAROLINE
  *
  * @version 1.7 $Revision: 1.13 $
  *

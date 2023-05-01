@@ -1,4 +1,5 @@
 <?php
+
 /*========================================================================
 *   Open eClass 2.3
 *   E-learning and Course Management System
@@ -78,7 +79,7 @@ if(isset($deleteQuestion))
 cData;
 
   $tool_content .= <<<cData
-  
+
     <table width="99%" class="Question">
     <tbody>
 cData;
@@ -96,7 +97,7 @@ if($nbrQuestions) {
 	<small class=\"invisible\">".$aType[$objQuestionTmp->selectType()-1]."</small></td>
 	<td class=\"right\" width=\"50\"><a href=\"".$_SERVER['PHP_SELF']."?editQuestion=".$id."\">"."<img src='../../template/classic/img/edit.gif' border='0' align='absmiddle' title='$langModify'></a>"." <a href=\"".$_SERVER['PHP_SELF']."?deleteQuestion=".$id."\" "."onclick=\"javascript:if(!confirm('".addslashes(htmlspecialchars($langConfirmYourChoice))."')) return false;\">"."<img src='../../template/classic/img/delete.gif' border='0' align='absmiddle' title='$langDelete'></a></td>
 	<td width='20'>";
-	
+
 		if($i != 1) {
 			$tool_content .= "<a href=\"".$_SERVER['PHP_SELF']."?moveUp=".$id."\">
    			<img src=\"../../template/classic/img/up.gif\" border=\"0\" align=\"absmiddle\" title=\"".$langUp."\"></a> ";

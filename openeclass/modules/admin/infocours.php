@@ -76,6 +76,17 @@ if (isset($search) && ($search=="yes")) {
 }
 // Update cours basic information
 if (isset($submit))  {
+  if (empty($_GET['token'])) {
+    header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+        exit(); 
+  }
+    
+    if ($_SESSION['token'] !== $_GET['token']) {
+    header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+        exit(); 
+  }
+  unset($_SESSION['token']);
+
   // Get faculte ID and faculte name for $faculte
   // $faculte example: 12--Tmima 1
   list($facid, $facname) = explode("--", $faculte);
@@ -98,7 +109,7 @@ else {
 	$row = mysql_fetch_array(mysql_query("SELECT * FROM cours WHERE code='".mysql_real_escape_string($_GET['c'])."'"));
 	// Constract the edit form
 	$tool_content .= "
-  <form action=".$_SERVER['PHP_SELF']."?c=".htmlspecialchars($_GET['c'])."".$searchurl." method=\"post\">
+  <form action=".htmlspecialchars($_SERVER['PHP_SELF'])."?c=".htmlspecialchars($_GET['c'])."".$searchurl." method=\"post\">
   <table class=\"FormData\" width=\"99%\" align=\"left\">
   <tbody>
   <tr>

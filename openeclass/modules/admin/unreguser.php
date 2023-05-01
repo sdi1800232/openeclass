@@ -64,10 +64,22 @@ if (!$doit) {
         }
         $tool_content .= ";</p>
                 <ul>
-                <li>$langYes: <a href=\"unreguser.php?u=".htmlspecialchars($u)."&c=".htmlspecialchars($c)."&doit=yes\">$langDelete</a><br>&nbsp;</li>
+                <li>$langYes: <a href=\"unreguser.php?u=".htmlspecialchars($u)."&c=".htmlspecialchars($c)."&doit=yes&token=".$_SESSION['token']."\">$langDelete</a><br>&nbsp;</li>
                 <li>$langNo: <a href=\"edituser.php?u=".htmlspecialchars($u)."\">$langBack</a></li>
+                <td></td>
                 </ul>";
 } else {
+        if (empty($_GET['token'])) {
+		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+						exit(); 
+}
+		
+		if ($_SESSION['token'] !== $_GET['token']) {
+		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
+						exit(); 
+}
+unset($_SESSION['token']);
+
         if (!$c) {
                 if ($u == 1) {
                         $tool_content .= $langTryDeleteAdmin;
