@@ -31,10 +31,8 @@
 	@authors list: Karatzidis Stratos <kstratos@uom.gr>
 		       Vagelis Pitsioygas <vagpits@uom.gr>
 ==============================================================================
-
  	Purpose: The file displays the form that that the candidate user must fill
  	in with all the basic information.
-
 ==============================================================================
 */
 
@@ -54,7 +52,6 @@ if (isset($close_user_registration) and $close_user_registration == TRUE) {
         draw($tool_content,0);
 	exit;
  }
-
 $lang = langname_to_code($language);
 
 // display form
@@ -99,6 +96,9 @@ if (!isset($submit)) {
 	<tr>
 	<th class='left'>$langFaculty</th>
 		<td colspan='2'><select name='department'>";
+
+	$_SESSION['token'] = bin2hex(openssl_random_pseudo_bytes(32));
+	
 	$deps=mysql_query("SELECT name, id FROM faculte ORDER BY id");
 	while ($dep = mysql_fetch_array($deps)) {
 		$tool_content .= "\n<option value='".$dep[1]."'>".$dep[0]."</option>";
@@ -127,18 +127,20 @@ if (!isset($submit)) {
 	</tr>
 	</thead>
 	</table>
+	<td><input  type=\"hidden\" name=\"token\" value='".$_SESSION['token']."'></td>
 	</form>";
 } else {
 
-	if (empty($_GET['token'])) {
-		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
-						exit(); 
+	if(empty($_POST['token'])) {
+		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized');
+		exit();
 	}
-		
-		if ($_SESSION['token'] !== $_GET['token']) {
-		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized Action');
-						exit(); 
+
+	if($_SESSION['token'] !== $_POST['token'] ){
+		header($_SERVER['SERVER_PROTOCOL'] . 'UnAuthorized');
+		exit();
 	}
+
 	unset($_SESSION['token']);
 
 	// trim white spaces in the end and in the beginning of the word
@@ -196,11 +198,9 @@ if (!isset($submit)) {
 				"$langManager $siteName \n$langTel $telephone \n" .
 				"$langEmail: $emailhelpdesk";
 		}
-
 	send_mail('', '', '', $email, $emailsubject, $emailbody, $charset);
 	$registered_at = time();
 	$expires_at = time() + $durationAccount;  //$expires_at = time() + 31536000;
-
 	// manage the store/encrypt process of password into database
 	$authmethods = array("2","3","4","5");
 	$uname = escapeSimple($uname);  // escape the characters: simple and double quote
@@ -211,17 +211,23 @@ if (!isset($submit)) {
 		$password_encrypted = $password;
 	}
 
-	$connection = new mysqli($GLOBALS['mysqlServer'], $GLOBALS['mysqlUser'], $GLOBALS['mysqlPassword'], $mysqlMainDb);
- 	
-	$stament = $connection->prepare("INSERT INTO `$mysqlMainDb`.user
-		(user_id, nom, prenom, username, password, email, statut, department, am, registered_at, expires_at, lang)
-	VALUES ('NULL', ? , ?, ?, ?, ?,'5',?,?,?,?,?)");
+  $connection = new mysqli($GLOBALS['mysqlServer'], $GLOBALS['mysqlUser'], $GLOBALS['mysqlPassword'], $mysqlMainDb);
 
-	$stament->bind_param("sssssisiis", $purifier->purify( mysql_real_escape_string($nom_form)),$purifier->purify( mysql_real_escape_string($prenom_form)),$purifier->purify( mysql_real_escape_string($uname))
-									,$password_encrypted,$purifier->purify( mysql_real_escape_string($email)), mysql_real_escape_string($department),$purifier->purify( mysql_real_escape_string($am)),$registered_at,$expires_at,$lang);
-	$inscr_user = $stament->execute();
-	$last_id = $stmt->insert_id;
-	$stament->close();
+ $statement = $connection->prepare("INSERT INTO `$mysqlMainDb`.user (user_id, nom, prenom, username, password, email, statut, department, am, registered_at, expires_at, lang) VALUES ('NULL', ? , ?, ?, ?, ?,'5',?,?,?,?,?)");
+
+	$statement->bind_param("sssssisiis", $purifier->purify(mysql_real_escape_string($nom_form)),
+	$purifier->purify( mysql_real_escape_string($prenom_form)),
+	$purifier->purify(mysql_real_escape_string($uname)),
+	$password_encrypted,$purifier->purify( mysql_real_escape_string($email)),
+	mysql_real_escape_string($department),
+	$purifier->purify( mysql_real_escape_string($am)),
+	$registered_at,
+	$expires_at,
+	$lang);
+	
+	$inscr_user = $statement->execute();
+	$last_id = $statement->insert_id;
+	$statement->close();
 	$connection->close();
 
 	$result=mysql_query("SELECT user_id, nom, prenom FROM `$mysqlMainDb`.user WHERE user_id='$last_id'");
@@ -237,7 +243,6 @@ if (!isset($submit)) {
 	$_SESSION['prenom'] = $prenom;
 	$_SESSION['nom'] = $nom;
 	$_SESSION['uname'] = $uname;
-
 	// registration form
 	$tool_content .= "<table width='99%'><tbody><tr>" .
 			"<td class='well-done' height='60'>" .
